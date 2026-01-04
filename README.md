@@ -1,7 +1,7 @@
-# 🍵 mac-dev-terminal-setup  
+# 🍵 mac-dev-terminal-setup
 **Tea's macOS Terminal Setup — Fast, Beautiful, Productive**
 
-สคริปต์ช่วยติดตั้ง Terminal สำหรับ macOS แบบครบชุดใน 1 คำสั่ง  
+สคริปต์ช่วยติดตั้ง Terminal สำหรับ macOS แบบครบชุดใน 1 คำสั่ง
 เหมาะสำหรับนักพัฒนา Node.js, Backend, DevOps, Git, Docker, Kubernetes
 รองรับภาษาไทย (Thai-safe UTF-8)
 
@@ -336,8 +336,8 @@ mac-dev-terminal-setup/
 - **Zsh**
 - **Oh My Zsh**
 - **Zsh Plugins**
-  - autosuggestions  
-  - syntax highlighting  
+  - autosuggestions
+  - syntax highlighting
 - **JetBrainsMono Nerd Font** (สำหรับแสดง icon)
 
 ### ✔ ติดตั้งแบบเลือกได้ (Optional):
@@ -1728,16 +1728,16 @@ nvm use 22
 
 ## 📜 License
 
-MIT License  
+MIT License
 Created & Maintained by **Tea (Sinochar Phuvapitak)**
 
 ---
 
 ## ❤️ Credits
 
-- Powerlevel10k  
-- Oh My Zsh  
-- JetBrains Mono Nerd Font  
+- Powerlevel10k
+- Oh My Zsh
+- JetBrains Mono Nerd Font
 - Tokyo Night iTerm Theme
 
 ---

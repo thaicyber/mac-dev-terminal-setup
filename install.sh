@@ -191,7 +191,7 @@ install_nvm_and_node() {
     else
       read -r -p "ติดตั้ง NVM และ Node.js? [y/N]: " install_node
     fi
-    
+
     if [[ "$install_node" != "y" && "$install_node" != "Y" ]]; then
       echo "⏭  Skipping NVM and Node.js"
       echo ""
@@ -309,7 +309,7 @@ install_dev_tools() {
   else
     read -r -p "ติดตั้ง Developer Tools? (Docker, kubectl, jq, etc.) [y/N]: " install_dev
   fi
-  
+
   if [[ "$install_dev" != "y" && "$install_dev" != "Y" ]]; then
     echo "⏭  Skipping Developer Tools"
     echo ""
@@ -379,7 +379,7 @@ install_database_tools() {
   else
     read -r -p "ติดตั้ง Database CLI? (PostgreSQL, Redis clients) [y/N]: " install_db
   fi
-  
+
   if [[ "$install_db" != "y" && "$install_db" != "Y" ]]; then
     echo "⏭  Skipping Database CLI Tools"
     echo ""
@@ -424,7 +424,7 @@ install_devops_tools() {
   else
     read -r -p "ติดตั้ง DevOps Tools? (Terraform, Helm) [y/N]: " install_devops
   fi
-  
+
   if [[ "$install_devops" != "y" && "$install_devops" != "Y" ]]; then
     echo "⏭  Skipping DevOps Tools"
     echo ""
@@ -466,7 +466,7 @@ install_modern_cli_tools() {
   else
     read -r -p "ติดตั้ง Modern CLI Tools? (fzf, bat, eza, ripgrep, etc.) [y/N]: " install_modern
   fi
-  
+
   if [[ "$install_modern" != "y" && "$install_modern" != "Y" ]]; then
     echo "⏭  Skipping Modern CLI Tools"
     echo ""
@@ -550,7 +550,7 @@ install_k8s_enhancement() {
   else
     read -r -p "ติดตั้ง Kubernetes Enhancement? (k9s, kubectx, kubens) [y/N]: " install_k8s_enh
   fi
-  
+
   if [[ "$install_k8s_enh" != "y" && "$install_k8s_enh" != "Y" ]]; then
     echo "⏭  Skipping Kubernetes Enhancement"
     echo ""
@@ -592,7 +592,7 @@ install_docker_enhancement() {
   else
     read -r -p "ติดตั้ง Docker Enhancement? (lazydocker) [y/N]: " install_docker_enh
   fi
-  
+
   if [[ "$install_docker_enh" != "y" && "$install_docker_enh" != "Y" ]]; then
     echo "⏭  Skipping Docker Enhancement"
     echo ""
@@ -626,7 +626,7 @@ install_extra_databases() {
   else
     read -r -p "ติดตั้ง Extra Database Clients? (MySQL, MongoDB) [y/N]: " install_extra_db
   fi
-  
+
   if [[ "$install_extra_db" != "y" && "$install_extra_db" != "Y" ]]; then
     echo "⏭  Skipping Extra Database Clients"
     echo ""
@@ -683,7 +683,7 @@ install_api_tools() {
   else
     read -r -p "ติดตั้ง API Development Tools? (httpie) [y/N]: " install_api
   fi
-  
+
   if [[ "$install_api" != "y" && "$install_api" != "Y" ]]; then
     echo "⏭  Skipping API Development Tools"
     echo ""
@@ -717,7 +717,7 @@ setup_shell_completions() {
   else
     read -r -p "ติดตั้ง Shell Completions? (kubectl, helm, terraform, etc.) [y/N]: " install_comp
   fi
-  
+
   if [[ "$install_comp" != "y" && "$install_comp" != "Y" ]]; then
     echo "⏭  Skipping Shell Completions"
     echo ""
@@ -815,7 +815,7 @@ install_cloud_tools() {
     else
       read -r -p "ติดตั้ง AWS CLI? [y/N]: " install_aws
     fi
-    
+
     if [[ "$install_aws" == "y" || "$install_aws" == "Y" ]]; then
       echo "📦 Installing AWS CLI..."
       brew install awscli || true
@@ -838,7 +838,7 @@ install_cloud_tools() {
     else
       read -r -p "ติดตั้ง Google Cloud CLI? [y/N]: " install_gcloud
     fi
-    
+
     if [[ "$install_gcloud" == "y" || "$install_gcloud" == "Y" ]]; then
       echo "📦 Installing Google Cloud CLI..."
       echo "➡ Detecting Mac architecture..."
@@ -1196,7 +1196,7 @@ case $MODE in
     else
       read -r -p "คุณแน่ใจหรือไม่? [y/N]: " confirm
     fi
-    
+
     if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
       do_install "true"
     else
