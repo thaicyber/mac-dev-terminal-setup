@@ -101,7 +101,7 @@ install_xcode_cli_tools() {
 
   # Wait for installation to complete
   echo "⏳ Waiting for installation to complete..."
-  echo "   (Checking every 5 seconds...)"
+  echo "   (Checking every 5 seconds, timeout: 30 minutes)"
 
   local wait_count=0
   until xcode-select -p &>/dev/null; do
@@ -113,9 +113,9 @@ install_xcode_cli_tools() {
       echo "   Still waiting... ($((wait_count / 12)) minute(s) elapsed)"
     fi
 
-    # Timeout after 15 minutes
-    if (( wait_count > 180 )); then
-      echo "❌ Installation timeout"
+    # Timeout after 30 minutes
+    if (( wait_count > 360 )); then
+      echo "❌ Installation timeout (30 minutes)"
       echo "💡 Please complete the installation manually and run this script again"
       echo "💡 Run: sudo xcode-select --install"
       return 1
@@ -130,6 +130,25 @@ install_homebrew() {
   if ! command -v brew &>/dev/null; then
     echo "🍺 Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    # Load Homebrew into current session
+    echo ""
+    echo "⚙️  Loading Homebrew into PATH..."
+
+    # Detect architecture and set correct Homebrew path
+    if [[ -f "/opt/homebrew/bin/brew" ]]; then
+      # Apple Silicon
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+      echo "✔ Homebrew loaded (Apple Silicon)"
+    elif [[ -f "/usr/local/bin/brew" ]]; then
+      # Intel
+      eval "$(/usr/local/bin/brew shellenv)"
+      echo "✔ Homebrew loaded (Intel)"
+    else
+      echo "⚠️  Warning: Homebrew binary not found at expected location"
+      echo "💡 You may need to manually add Homebrew to PATH"
+      return 1
+    fi
   else
     echo "✔ Homebrew already installed"
   fi
