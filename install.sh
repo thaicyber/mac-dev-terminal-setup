@@ -4,6 +4,7 @@ set -e
 
 BACKUP_DIR="$HOME/backup-terminal"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+AUTO_INSTALL_ALL=false
 
 # ----------------------------------------------------------
 # Helper Functions
@@ -184,7 +185,13 @@ install_nvm_and_node() {
   if [[ -d "$HOME/.nvm" ]] || command -v nvm &>/dev/null; then
     echo "✔ NVM already installed"
   else
-    read -r -p "ติดตั้ง NVM และ Node.js? [y/N]: " install_node
+    if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+      install_node="y"
+      echo "🤖 Auto-install mode: Installing NVM และ Node.js"
+    else
+      read -r -p "ติดตั้ง NVM และ Node.js? [y/N]: " install_node
+    fi
+    
     if [[ "$install_node" != "y" && "$install_node" != "Y" ]]; then
       echo "⏭  Skipping NVM and Node.js"
       echo ""
@@ -212,10 +219,16 @@ install_nvm_and_node() {
 
   # Ask about package managers
   echo ""
-  read -r -p "ติดตั้ง pnpm และ yarn? (แนะนำสำหรับ modern development) [y/N]: " install_pm
-  INSTALL_PACKAGE_MANAGERS="false"
-  if [[ "$install_pm" == "y" || "$install_pm" == "Y" ]]; then
+  if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+    install_pm="y"
     INSTALL_PACKAGE_MANAGERS="true"
+    echo "🤖 Auto-install mode: Installing pnpm และ yarn"
+  else
+    read -r -p "ติดตั้ง pnpm และ yarn? (แนะนำสำหรับ modern development) [y/N]: " install_pm
+    INSTALL_PACKAGE_MANAGERS="false"
+    if [[ "$install_pm" == "y" || "$install_pm" == "Y" ]]; then
+      INSTALL_PACKAGE_MANAGERS="true"
+    fi
   fi
 
   # Install Node.js versions
@@ -290,7 +303,13 @@ install_dev_tools() {
   echo "🛠  Developer Tools"
   echo "-------------------------------------------"
 
-  read -r -p "ติดตั้ง Developer Tools? (Docker, kubectl, jq, etc.) [y/N]: " install_dev
+  if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+    install_dev="y"
+    echo "🤖 Auto-install mode: Installing Developer Tools"
+  else
+    read -r -p "ติดตั้ง Developer Tools? (Docker, kubectl, jq, etc.) [y/N]: " install_dev
+  fi
+  
   if [[ "$install_dev" != "y" && "$install_dev" != "Y" ]]; then
     echo "⏭  Skipping Developer Tools"
     echo ""
@@ -354,7 +373,13 @@ install_database_tools() {
   echo "🗄  Database CLI Tools"
   echo "-------------------------------------------"
 
-  read -r -p "ติดตั้ง Database CLI? (PostgreSQL, Redis clients) [y/N]: " install_db
+  if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+    install_db="y"
+    echo "🤖 Auto-install mode: Installing Database CLI Tools"
+  else
+    read -r -p "ติดตั้ง Database CLI? (PostgreSQL, Redis clients) [y/N]: " install_db
+  fi
+  
   if [[ "$install_db" != "y" && "$install_db" != "Y" ]]; then
     echo "⏭  Skipping Database CLI Tools"
     echo ""
@@ -393,7 +418,13 @@ install_devops_tools() {
   echo "⚙️  DevOps Tools (Advanced)"
   echo "-------------------------------------------"
 
-  read -r -p "ติดตั้ง DevOps Tools? (Terraform, Helm) [y/N]: " install_devops
+  if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+    install_devops="y"
+    echo "🤖 Auto-install mode: Installing DevOps Tools"
+  else
+    read -r -p "ติดตั้ง DevOps Tools? (Terraform, Helm) [y/N]: " install_devops
+  fi
+  
   if [[ "$install_devops" != "y" && "$install_devops" != "Y" ]]; then
     echo "⏭  Skipping DevOps Tools"
     echo ""
@@ -429,7 +460,13 @@ install_modern_cli_tools() {
   echo "✨ Modern CLI Tools (Productivity Boost)"
   echo "-------------------------------------------"
 
-  read -r -p "ติดตั้ง Modern CLI Tools? (fzf, bat, eza, ripgrep, etc.) [y/N]: " install_modern
+  if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+    install_modern="y"
+    echo "🤖 Auto-install mode: Installing Modern CLI Tools"
+  else
+    read -r -p "ติดตั้ง Modern CLI Tools? (fzf, bat, eza, ripgrep, etc.) [y/N]: " install_modern
+  fi
+  
   if [[ "$install_modern" != "y" && "$install_modern" != "Y" ]]; then
     echo "⏭  Skipping Modern CLI Tools"
     echo ""
@@ -507,7 +544,13 @@ install_k8s_enhancement() {
   echo "⎈ Kubernetes Enhancement Tools"
   echo "-------------------------------------------"
 
-  read -r -p "ติดตั้ง Kubernetes Enhancement? (k9s, kubectx, kubens) [y/N]: " install_k8s_enh
+  if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+    install_k8s_enh="y"
+    echo "🤖 Auto-install mode: Installing Kubernetes Enhancement"
+  else
+    read -r -p "ติดตั้ง Kubernetes Enhancement? (k9s, kubectx, kubens) [y/N]: " install_k8s_enh
+  fi
+  
   if [[ "$install_k8s_enh" != "y" && "$install_k8s_enh" != "Y" ]]; then
     echo "⏭  Skipping Kubernetes Enhancement"
     echo ""
@@ -543,7 +586,13 @@ install_docker_enhancement() {
   echo "🐳 Docker Enhancement Tools"
   echo "-------------------------------------------"
 
-  read -r -p "ติดตั้ง Docker Enhancement? (lazydocker) [y/N]: " install_docker_enh
+  if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+    install_docker_enh="y"
+    echo "🤖 Auto-install mode: Installing Docker Enhancement"
+  else
+    read -r -p "ติดตั้ง Docker Enhancement? (lazydocker) [y/N]: " install_docker_enh
+  fi
+  
   if [[ "$install_docker_enh" != "y" && "$install_docker_enh" != "Y" ]]; then
     echo "⏭  Skipping Docker Enhancement"
     echo ""
@@ -571,7 +620,13 @@ install_extra_databases() {
   echo "🗄  Extra Database Clients"
   echo "-------------------------------------------"
 
-  read -r -p "ติดตั้ง Extra Database Clients? (MySQL, MongoDB) [y/N]: " install_extra_db
+  if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+    install_extra_db="y"
+    echo "🤖 Auto-install mode: Installing Extra Database Clients"
+  else
+    read -r -p "ติดตั้ง Extra Database Clients? (MySQL, MongoDB) [y/N]: " install_extra_db
+  fi
+  
   if [[ "$install_extra_db" != "y" && "$install_extra_db" != "Y" ]]; then
     echo "⏭  Skipping Extra Database Clients"
     echo ""
@@ -622,7 +677,13 @@ install_api_tools() {
   echo "🔧 API Development Tools"
   echo "-------------------------------------------"
 
-  read -r -p "ติดตั้ง API Development Tools? (httpie) [y/N]: " install_api
+  if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+    install_api="y"
+    echo "🤖 Auto-install mode: Installing API Development Tools"
+  else
+    read -r -p "ติดตั้ง API Development Tools? (httpie) [y/N]: " install_api
+  fi
+  
   if [[ "$install_api" != "y" && "$install_api" != "Y" ]]; then
     echo "⏭  Skipping API Development Tools"
     echo ""
@@ -650,7 +711,13 @@ setup_shell_completions() {
   echo "🎯 Shell Completions Setup"
   echo "-------------------------------------------"
 
-  read -r -p "ติดตั้ง Shell Completions? (kubectl, helm, terraform, etc.) [y/N]: " install_comp
+  if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+    install_comp="y"
+    echo "🤖 Auto-install mode: Setting up Shell Completions"
+  else
+    read -r -p "ติดตั้ง Shell Completions? (kubectl, helm, terraform, etc.) [y/N]: " install_comp
+  fi
+  
   if [[ "$install_comp" != "y" && "$install_comp" != "Y" ]]; then
     echo "⏭  Skipping Shell Completions"
     echo ""
@@ -742,7 +809,13 @@ install_cloud_tools() {
   if command -v aws &>/dev/null; then
     echo "✔ AWS CLI already installed"
   else
-    read -r -p "ติดตั้ง AWS CLI? [y/N]: " install_aws
+    if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+      install_aws="y"
+      echo "🤖 Auto-install mode: Installing AWS CLI"
+    else
+      read -r -p "ติดตั้ง AWS CLI? [y/N]: " install_aws
+    fi
+    
     if [[ "$install_aws" == "y" || "$install_aws" == "Y" ]]; then
       echo "📦 Installing AWS CLI..."
       brew install awscli || true
@@ -759,7 +832,13 @@ install_cloud_tools() {
   if command -v gcloud &>/dev/null; then
     echo "✔ Google Cloud CLI already installed"
   else
-    read -r -p "ติดตั้ง Google Cloud CLI? [y/N]: " install_gcloud
+    if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+      install_gcloud="y"
+      echo "🤖 Auto-install mode: Installing Google Cloud CLI"
+    else
+      read -r -p "ติดตั้ง Google Cloud CLI? [y/N]: " install_gcloud
+    fi
+    
     if [[ "$install_gcloud" == "y" || "$install_gcloud" == "Y" ]]; then
       echo "📦 Installing Google Cloud CLI..."
       echo "➡ Detecting Mac architecture..."
@@ -1059,9 +1138,48 @@ do_install() {
 # Main Script
 # ----------------------------------------------------------
 
+# Parse command line arguments
+MODE=""
+for arg in "$@"; do
+  case $arg in
+    --all)
+      AUTO_INSTALL_ALL=true
+      shift
+      ;;
+    install|reinstall|uninstall)
+      MODE="$arg"
+      shift
+      ;;
+    --help|-h)
+      echo "Usage: bash install.sh [MODE] [OPTIONS]"
+      echo ""
+      echo "Modes:"
+      echo "  install      - ติดตั้งใหม่ (ไม่ทับไฟล์เดิม)"
+      echo "  reinstall    - ติดตั้งใหม่ทั้งหมด (ทับไฟล์เดิม)"
+      echo "  uninstall    - ลบการติดตั้งทั้งหมด"
+      echo ""
+      echo "Options:"
+      echo "  --all        - ติดตั้งทุกอย่างโดยอัตโนมัติ (ไม่ถาม Y/N)"
+      echo ""
+      echo "Examples:"
+      echo "  bash install.sh                    # Interactive mode"
+      echo "  bash install.sh install --all      # Auto-install everything"
+      echo "  bash install.sh reinstall --all    # Auto-reinstall everything"
+      exit 0
+      ;;
+    *)
+      # Unknown option
+      ;;
+  esac
+done
+
 show_banner
 check_macos
-show_menu
+
+# If MODE is not set via arguments, show menu
+if [[ -z "$MODE" ]]; then
+  show_menu
+fi
 
 case $MODE in
   install)
@@ -1072,7 +1190,13 @@ case $MODE in
   reinstall)
     echo "🔄 Mode: Reinstall (ติดตั้งใหม่ทั้งหมด)"
     echo ""
-    read -r -p "คุณแน่ใจหรือไม่? [y/N]: " confirm
+    if [[ "$AUTO_INSTALL_ALL" == "true" ]]; then
+      confirm="y"
+      echo "🤖 Auto-install mode: Proceeding with reinstall"
+    else
+      read -r -p "คุณแน่ใจหรือไม่? [y/N]: " confirm
+    fi
+    
     if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
       do_install "true"
     else
