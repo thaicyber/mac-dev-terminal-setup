@@ -239,12 +239,22 @@ install_nvm_and_node() {
 
     # Install package managers for each Node version
     if [[ "$INSTALL_PACKAGE_MANAGERS" == "true" ]]; then
-      echo "   📦 Installing pnpm and yarn for Node.js ${version}..."
       nvm use "$version" &>/dev/null || {
         echo "   ⚠️  Cannot switch to Node.js ${version}, skipping package managers"
         continue
       }
-      npm install -g pnpm yarn 2>/dev/null || echo "   ⚠️  Failed to install package managers"
+
+      # Check if pnpm and yarn are already installed for this version
+      local has_pnpm has_yarn
+      has_pnpm=$(command -v pnpm &>/dev/null && echo "yes" || echo "no")
+      has_yarn=$(command -v yarn &>/dev/null && echo "yes" || echo "no")
+
+      if [[ "$has_pnpm" == "yes" && "$has_yarn" == "yes" ]]; then
+        echo "   ✔ pnpm and yarn already installed for Node.js ${version}"
+      else
+        echo "   📦 Installing pnpm and yarn for Node.js ${version}..."
+        npm install -g pnpm yarn 2>/dev/null || echo "   ⚠️  Failed to install package managers"
+      fi
     fi
   done
 
