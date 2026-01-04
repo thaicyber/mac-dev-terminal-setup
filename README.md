@@ -25,9 +25,15 @@ curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/ma
 ติดตั้งทุกอย่างอัตโนมัติ **ไม่ต้องตอบคำถาม:**
 
 ```bash
-# One-liner: Download & auto-install everything
+# สำหรับเครื่องใหม่ (ยังไม่มี Homebrew) - ต้องดาวน์โหลดก่อน
+curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/install.sh -o ~/install.sh
+bash ~/install.sh install --all
+
+# สำหรับเครื่องที่มี Homebrew แล้ว - ใช้ one-liner ได้
 curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/install.sh | bash -s install --all
 ```
+
+> **⚠️ หมายเหตุ:** One-liner (curl pipe) ใช้ไม่ได้กับเครื่องใหม่ที่ยังไม่มี Homebrew เพราะ Homebrew ต้องการ sudo password ซึ่งไม่สามารถป้อนได้ใน pipe mode
 
 ### วิธีที่ 3: Manual Download
 
@@ -102,8 +108,9 @@ exit $?
 
 #### Quick Setup บน VM:
 ```bash
-# One-liner: Download & auto-install
-curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/install.sh | bash -s install --all
+# Download & auto-install (รองรับ non-interactive mode)
+curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/install.sh -o ~/install.sh
+bash ~/install.sh install --all
 ```
 
 #### Team Onboarding:
@@ -130,6 +137,22 @@ bash install.sh install --all
 - ✅ Cloud: AWS CLI, Google Cloud CLI
 - ✅ Shell Completions สำหรับเครื่องมือทั้งหมด
 - ✅ Themes & Configs: Tokyo Night, Powerlevel10k, Aliases
+
+### 🚨 ข้อควรระวังเมื่อใช้ --all:
+
+**การใช้ curl pipe (`curl | bash`):**
+- ✅ **ใช้ได้:** เครื่องที่มี Homebrew แล้ว
+- ❌ **ใช้ไม่ได้:** เครื่องใหม่ที่ยังไม่มี Homebrew
+
+**วิธีแก้สำหรับเครื่องใหม่:**
+```bash
+# ดาวน์โหลดก่อน แล้วค่อยรัน (สามารถป้อน sudo password ได้)
+curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/install.sh -o ~/install.sh
+bash ~/install.sh install --all
+```
+
+**เหตุผล:**
+Homebrew ต้องการ sudo password ในการติดตั้ง ซึ่งไม่สามารถป้อนได้เมื่อใช้ pipe mode (non-interactive)
 
 ---
 
