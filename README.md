@@ -1,7 +1,7 @@
-# 🍵 mac-dev-terminal-setup
+# 🍵 mac-dev-terminal-setup  
 **Tea's macOS Terminal Setup — Fast, Beautiful, Productive**
 
-สคริปต์ช่วยติดตั้ง Terminal สำหรับ macOS แบบครบชุดใน 1 คำสั่ง
+สคริปต์ช่วยติดตั้ง Terminal สำหรับ macOS แบบครบชุดใน 1 คำสั่ง  
 เหมาะสำหรับนักพัฒนา Node.js, Backend, DevOps, Git, Docker, Kubernetes
 รองรับภาษาไทย (Thai-safe UTF-8)
 
@@ -20,12 +20,26 @@ curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/ma
 - **Reinstall** - ติดตั้งใหม่ทั้งหมด (ทับไฟล์เดิม)
 - **Uninstall** - ลบการติดตั้งทั้งหมด
 
-### วิธีที่ 2: Manual Download
+### วิธีที่ 2: Automated Mode (สำหรับ CI/CD หรือ Testing) ⭐
+
+ติดตั้งทุกอย่างอัตโนมัติ **ไม่ต้องตอบคำถาม:**
+
+```bash
+# One-liner: Download & auto-install everything
+curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/install.sh | bash -s install --all
+```
+
+### วิธีที่ 3: Manual Download
 
 ```bash
 git clone https://github.com/thaicyber/mac-dev-terminal-setup.git
 cd mac-dev-terminal-setup
+
+# Interactive mode
 bash install.sh
+
+# หรือ Automated mode (ติดตั้งทุกอย่าง)
+bash install.sh install --all
 ```
 
 ## 🎯 Installation Modes
@@ -47,6 +61,75 @@ bash install.sh
 - **ไม่ลบ**: Homebrew, iTerm2, Oh My Zsh, Fonts
 - สร้าง backup อัตโนมัติก่อนลบ
 - ปลอดภัย สามารถกู้คืนได้
+
+---
+
+## 🤖 Automated Installation (--all)
+
+### การใช้งานแบบอัตโนมัติ
+
+ใช้ flag `--all` เพื่อติดตั้งทุกอย่างโดยอัตโนมัติ **ไม่ต้องตอบคำถาม Y/N**
+
+```bash
+# ติดตั้งใหม่ทั้งหมดอัตโนมัติ
+bash install.sh install --all
+
+# Reinstall ทั้งหมดอัตโนมัติ
+bash install.sh reinstall --all
+
+# ดูคำสั่งที่ใช้ได้
+bash install.sh --help
+```
+
+### ประโยชน์ของ --all:
+
+✅ **สำหรับ CI/CD Pipeline** - รันได้โดยอัตโนมัติ
+✅ **สำหรับการทดสอบ** - Setup VM ได้เร็ว
+✅ **สำหรับทีม** - ติดตั้งแบบเดียวกันทุกเครื่อง
+✅ **ประหยัดเวลา** - ไม่ต้องรอตอบคำถาม
+✅ **Consistent** - ได้ผลลัพธ์เหมือนกันทุกครั้ง
+
+### ตัวอย่างการใช้งาน:
+
+#### CI/CD Pipeline:
+```bash
+#!/bin/bash
+# Automated setup and test
+bash install.sh install --all
+bash docs/test-installation.sh
+exit $?
+```
+
+#### Quick Setup บน VM:
+```bash
+# One-liner: Download & auto-install
+curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/install.sh | bash -s install --all
+```
+
+#### Team Onboarding:
+```bash
+# Setup เครื่องใหม่สำหรับทีม
+git clone https://github.com/thaicyber/mac-dev-terminal-setup.git
+cd mac-dev-terminal-setup
+bash install.sh install --all
+```
+
+### Components ที่ติดตั้งเมื่อใช้ --all:
+
+เมื่อใช้ `--all` จะติดตั้ง **ทุกอย่าง** รวมถึง:
+
+- ✅ Core: xcode-select, Homebrew, Git, Zsh, iTerm2, Oh My Zsh
+- ✅ Node.js: NVM + versions 16, 18, 20, 22, 24 + pnpm + yarn
+- ✅ Developer Tools: Docker, kubectl, gh, jq, wget, tree, htop, rsync, Python
+- ✅ Database: PostgreSQL, Redis, MySQL, MongoDB clients
+- ✅ DevOps: Terraform, Helm
+- ✅ Modern CLI: fzf, bat, eza, ripgrep, fd, tldr, zoxide
+- ✅ Kubernetes: k9s, kubectx, kubens
+- ✅ Docker: lazydocker
+- ✅ API: httpie
+- ✅ Cloud: AWS CLI, Google Cloud CLI
+- ✅ Shell Completions สำหรับเครื่องมือทั้งหมด
+- ✅ Themes & Configs: Tokyo Night, Powerlevel10k, Aliases
 
 ---
 
@@ -253,8 +336,8 @@ mac-dev-terminal-setup/
 - **Zsh**
 - **Oh My Zsh**
 - **Zsh Plugins**
-  - autosuggestions
-  - syntax highlighting
+  - autosuggestions  
+  - syntax highlighting  
 - **JetBrainsMono Nerd Font** (สำหรับแสดง icon)
 
 ### ✔ ติดตั้งแบบเลือกได้ (Optional):
@@ -1645,16 +1728,16 @@ nvm use 22
 
 ## 📜 License
 
-MIT License
+MIT License  
 Created & Maintained by **Tea (Sinochar Phuvapitak)**
 
 ---
 
 ## ❤️ Credits
 
-- Powerlevel10k
-- Oh My Zsh
-- JetBrains Mono Nerd Font
+- Powerlevel10k  
+- Oh My Zsh  
+- JetBrains Mono Nerd Font  
 - Tokyo Night iTerm Theme
 
 ---
@@ -1665,6 +1748,7 @@ Created & Maintained by **Tea (Sinochar Phuvapitak)**
 
 #### 🎯 Core Features:
 - ✅ **3 Installation Modes** (Install, Reinstall, Uninstall)
+- ✅ **Automated Installation** (--all flag) - ไม่ต้องตอบคำถาม ⭐ NEW
 - ✅ **Automatic Backup System**
 - ✅ **Command Line Tools** (xcode-select) auto-install
 - ✅ **Git** version control
