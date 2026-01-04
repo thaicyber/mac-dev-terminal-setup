@@ -226,17 +226,24 @@ install_nvm_and_node() {
   DEFAULT_VERSION=22
 
   for version in "${NODE_VERSIONS[@]}"; do
-    if nvm list | grep -q "v${version}"; then
+    # Check if version is already installed (exact match)
+    if nvm version "$version" &>/dev/null && [[ "$(nvm version "$version")" != "N/A" ]]; then
       echo "✔ Node.js ${version} already installed"
     else
       echo "📥 Installing Node.js ${version}..."
-      nvm install "$version" || echo "⚠️  Failed to install Node.js ${version}"
+      nvm install "$version" || {
+        echo "⚠️  Failed to install Node.js ${version}"
+        continue
+      }
     fi
 
     # Install package managers for each Node version
     if [[ "$INSTALL_PACKAGE_MANAGERS" == "true" ]]; then
-      nvm use "$version"
       echo "   📦 Installing pnpm and yarn for Node.js ${version}..."
+      nvm use "$version" &>/dev/null || {
+        echo "   ⚠️  Cannot switch to Node.js ${version}, skipping package managers"
+        continue
+      }
       npm install -g pnpm yarn 2>/dev/null || echo "   ⚠️  Failed to install package managers"
     fi
   done
