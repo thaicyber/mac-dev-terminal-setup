@@ -1881,4 +1881,4 @@ Created & Maintained by **Tea (Sinochar Phuvapitak)**
 - Azure CLI integration
 - More database clients (MongoDB Atlas CLI, DynamoDB CLI)
 
-เปิด Issue ใน repo ได้เลย หรือแจ้งผ่านผู้สร้างระบบ (Tea / ChatGPT)
+เปิด Issue ใน repo ได้เลย หรือแจ้งผ่านผู้สร้างระบบ (Tea)

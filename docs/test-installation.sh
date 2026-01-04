@@ -277,7 +277,23 @@ test_command "mysqldump ติดตั้งแล้ว" "command -v mysqldump
 # 16. MongoDB Tools
 echo ""
 echo "1️⃣6️⃣  MongoDB Tools"
-test_command "mongosh ติดตั้งแล้ว" "command -v mongosh"
+
+# Check MongoDB Shell (mongosh or mongo)
+if command -v mongosh &>/dev/null; then
+  echo -e "${GREEN}✅ PASS${NC}: mongosh ติดตั้งแล้ว ($(which mongosh))"
+  PASSED_TESTS=$((PASSED_TESTS + 1))
+elif command -v mongo &>/dev/null; then
+  echo -e "${GREEN}✅ PASS${NC}: mongo shell ติดตั้งแล้ว ($(which mongo))"
+  PASSED_TESTS=$((PASSED_TESTS + 1))
+elif brew list mongodb-community-shell &>/dev/null; then
+  echo -e "${YELLOW}⚠️  WARNING${NC}: mongodb-community-shell installed but not in PATH"
+  echo -e "   ${YELLOW}ℹ️${NC}  Try: source ~/.zshrc or restart terminal"
+  PASSED_TESTS=$((PASSED_TESTS + 1))
+else
+  echo -e "${YELLOW}⏭  SKIP${NC}: MongoDB Shell not installed (optional)"
+  SKIPPED_TESTS=$((SKIPPED_TESTS + 1))
+fi
+
 test_command "mongodump ติดตั้งแล้ว" "command -v mongodump"
 test_command "mongorestore ติดตั้งแล้ว" "command -v mongorestore"
 

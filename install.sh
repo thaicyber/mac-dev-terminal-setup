@@ -660,13 +660,20 @@ install_extra_databases() {
   fi
 
   # MongoDB Shell
-  if command -v mongosh &>/dev/null; then
+  if command -v mongosh &>/dev/null || command -v mongo &>/dev/null; then
     echo "✔ MongoDB Shell already installed"
   else
     echo "🍃 Installing MongoDB Shell (mongosh)..."
     # MongoDB shell requires the MongoDB tap
     brew tap mongodb/brew 2>/dev/null || true
-    brew install mongodb/brew/mongodb-community-shell || echo "⚠️  Failed to install mongosh"
+    if brew install mongodb/brew/mongodb-community-shell; then
+      echo "✔ MongoDB Shell installed"
+      # Try to link if needed
+      brew link --overwrite mongodb-community-shell 2>/dev/null || true
+      echo "💡 Note: Restart terminal to use 'mongosh' command"
+    else
+      echo "⚠️  Failed to install mongosh"
+    fi
   fi
 
   # MongoDB Database Tools
