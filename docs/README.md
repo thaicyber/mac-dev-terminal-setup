@@ -1,6 +1,6 @@
 # 📚 เอกสารและเครื่องมือทดสอบ - mac-dev-terminal-setup V7
 
-**เวอร์ชัน:** V7  
+**เวอร์ชัน:** V7
 **อัปเดตล่าสุด:** 2026-01-04
 
 ---
@@ -19,12 +19,19 @@
 สคริปต์ทดสอบอัตโนมัติสำหรับตรวจสอบการติดตั้ง
 
 ```bash
-# รันการทดสอบ
+# รันการทดสอบ (ถ้าอยู่ใน repo)
 bash docs/test-installation.sh
 
-# หรือดาวน์โหลดและรัน
-curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/docs/test-installation.sh -o ~/test-installation.sh
-bash ~/test-installation.sh
+# รันทันทีจาก GitHub (แบบ pipe)
+curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/docs/test-installation.sh | bash
+
+# หรือดาวน์โหลดก่อนแล้วค่อยรัน
+curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/docs/test-installation.sh -o ~/test.sh
+bash ~/test.sh
+
+# บันทึกผลการทดสอบ
+curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/docs/test-installation.sh -o ~/test.sh
+bash ~/test.sh | tee ~/test-results.txt
 ```
 
 **คุณสมบัติ:**
@@ -121,8 +128,11 @@ Guide for setting up macOS VM on Mac M4 (Apple Silicon)
 # 1. ติดตั้ง
 bash install.sh
 
-# 2. ทดสอบอัตโนมัติ
+# 2. ทดสอบอัตโนมัติ (ถ้าอยู่ใน repo)
 bash docs/test-installation.sh
+
+# หรือ รันทันทีจาก GitHub
+curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/docs/test-installation.sh | bash
 
 # 3. ถ้าต้องการทดสอบละเอียด
 # อ่าน docs/TESTING_CHECKLIST_TH.md
@@ -139,8 +149,9 @@ bash docs/test-installation.sh
 # 2. ติดตั้งบน VM
 bash install.sh
 
-# 3. ทดสอบอัตโนมัติ
-bash docs/test-installation.sh | tee test-results.txt
+# 3. ทดสอบอัตโนมัติและบันทึกผล
+curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/docs/test-installation.sh -o ~/test.sh
+bash ~/test.sh | tee ~/test-results.txt
 
 # 4. ทดสอบ manual
 # ทำตาม docs/TESTING_CHECKLIST_TH.md
@@ -264,7 +275,7 @@ diff ~/before.txt ~/after.txt
 
 ---
 
-**สร้างโดย:** Tea Terminal Setup Team  
-**Repository:** https://github.com/thaicyber/mac-dev-terminal-setup  
+**สร้างโดย:** Tea Terminal Setup Team
+**Repository:** https://github.com/thaicyber/mac-dev-terminal-setup
 **License:** MIT
 
