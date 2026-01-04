@@ -128,15 +128,19 @@ Guide for setting up macOS VM on Mac M4 (Apple Silicon)
 # 1. ติดตั้ง
 bash install.sh
 
-# 2. ทดสอบอัตโนมัติ (ถ้าอยู่ใน repo)
+# 2. ⚠️ สำคัญ: ปิด Terminal เดิมและเปิดใหม่ก่อนทดสอบ!
+
+# 3. ทดสอบอัตโนมัติ (ถ้าอยู่ใน repo)
 bash docs/test-installation.sh
 
 # หรือ รันทันทีจาก GitHub
 curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/docs/test-installation.sh | bash
 
-# 3. ถ้าต้องการทดสอบละเอียด
+# 4. ถ้าต้องการทดสอบละเอียด
 # อ่าน docs/TESTING_CHECKLIST_TH.md
 ```
+
+> **⚠️ สำคัญ:** หลังติดตั้งเสร็จ **ต้องปิด Terminal เดิมและเปิดใหม่** ห้ามใช้ Terminal เดิมที่เพิ่งติดตั้งเสร็จ เพื่อให้ environment ถูกโหลดครบถ้วน
 
 ---
 
@@ -149,16 +153,20 @@ curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/ma
 # 2. ติดตั้งบน VM
 bash install.sh
 
-# 3. ทดสอบอัตโนมัติและบันทึกผล
+# 3. ⚠️ สำคัญ: ปิด Terminal เดิมและเปิดใหม่ก่อนทดสอบ!
+
+# 4. ทดสอบอัตโนมัติและบันทึกผล
 curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/main/docs/test-installation.sh -o ~/test.sh
 bash ~/test.sh | tee ~/test-results.txt
 
-# 4. ทดสอบ manual
+# 5. ทดสอบ manual
 # ทำตาม docs/TESTING_CHECKLIST_TH.md
 
-# 5. Create snapshot
+# 6. Create snapshot
 # ตามคู่มือ VM
 ```
+
+> **⚠️ คำเตือน:** ห้ามทดสอบใน Terminal เดิมที่เพิ่งรัน install.sh เสร็จ! ต้องเปิด Terminal ใหม่เสมอ
 
 ---
 
