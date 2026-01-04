@@ -45,7 +45,6 @@ print_section() {
 test_command() {
   local name="$1"
   local command="$2"
-  local expected="$3"
 
   TOTAL_TESTS=$((TOTAL_TESTS + 1))
 
@@ -133,7 +132,18 @@ else
   skip_test "Zsh plugins (Homebrew not found)"
 fi
 
-test_file_exists "iTerm2 ติดตั้งแล้ว" "/Applications/iTerm2.app"
+# Check for both iTerm2.app and iTerm.app
+if [[ -e "/Applications/iTerm2.app" ]] || [[ -e "/Applications/iTerm.app" ]]; then
+  echo -e "${GREEN}✅ PASS${NC}: iTerm2/iTerm ติดตั้งแล้ว"
+  PASSED_TESTS=$((PASSED_TESTS + 1))
+  TOTAL_TESTS=$((TOTAL_TESTS + 1))
+  TEST_RESULTS+=("PASS: iTerm2/iTerm ติดตั้งแล้ว")
+else
+  echo -e "${RED}❌ FAIL${NC}: iTerm2/iTerm ติดตั้งแล้ว"
+  FAILED_TESTS=$((FAILED_TESTS + 1))
+  TOTAL_TESTS=$((TOTAL_TESTS + 1))
+  TEST_RESULTS+=("FAIL: iTerm2/iTerm ติดตั้งแล้ว")
+fi
 test_command "JetBrainsMono Nerd Font ติดตั้งแล้ว" "ls ~/Library/Fonts/ | grep -i jetbrains"
 
 # 4. Oh My Zsh
@@ -196,7 +206,19 @@ print_section "🛠  Phase 3: Developer Tools"
 # 7. Docker Desktop
 echo "7️⃣  Docker Desktop"
 test_command "Docker command พร้อมใช้งาน" "command -v docker"
-test_command "Docker Compose พร้อมใช้งาน" "command -v docker-compose || docker compose version"
+
+# Check for both docker-compose (standalone) and docker compose (plugin)
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+if command -v docker-compose &>/dev/null || docker compose version &>/dev/null; then
+  echo -e "${GREEN}✅ PASS${NC}: Docker Compose พร้อมใช้งาน"
+  PASSED_TESTS=$((PASSED_TESTS + 1))
+  TEST_RESULTS+=("PASS: Docker Compose พร้อมใช้งาน")
+else
+  echo -e "${RED}❌ FAIL${NC}: Docker Compose พร้อมใช้งาน"
+  FAILED_TESTS=$((FAILED_TESTS + 1))
+  TEST_RESULTS+=("FAIL: Docker Compose พร้อมใช้งาน")
+fi
+
 test_file_exists "Docker.app ติดตั้งแล้ว" "/Applications/Docker.app"
 
 # 8. kubectl

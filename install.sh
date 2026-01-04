@@ -596,7 +596,9 @@ install_extra_databases() {
     echo "✔ MongoDB Shell already installed"
   else
     echo "🍃 Installing MongoDB Shell (mongosh)..."
-    brew install mongosh || echo "⚠️  Failed to install mongosh"
+    # MongoDB shell requires the MongoDB tap
+    brew tap mongodb/brew 2>/dev/null || true
+    brew install mongodb/brew/mongodb-community-shell || echo "⚠️  Failed to install mongosh"
   fi
 
   # MongoDB Database Tools
@@ -604,7 +606,9 @@ install_extra_databases() {
     echo "✔ MongoDB Database Tools already installed"
   else
     echo "🛠  Installing MongoDB Database Tools..."
-    brew install mongodb-database-tools || echo "⚠️  Failed to install mongodb-database-tools"
+    # MongoDB tools require the MongoDB tap
+    brew tap mongodb/brew 2>/dev/null || true
+    brew install mongodb/brew/mongodb-database-tools || echo "⚠️  Failed to install mongodb-database-tools"
   fi
 
   echo ""
