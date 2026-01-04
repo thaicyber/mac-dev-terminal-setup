@@ -160,7 +160,7 @@ install_homebrew() {
 
   echo "➡ Updating Homebrew..."
   echo "💡 This may take a while on slow connections..."
-  
+
   # Try to update with longer timeout, but don't fail if it doesn't work
   if ! brew update 2>/dev/null; then
     echo "⚠️  Warning: Homebrew update failed (possibly due to slow network)"
