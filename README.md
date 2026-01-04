@@ -1579,6 +1579,29 @@ curl -fsSL https://raw.githubusercontent.com/thaicyber/mac-dev-terminal-setup/ma
 source ~/.zshrc
 ```
 
+### ❗ Homebrew update ล้มเหลว (Operation too slow)
+**สาเหตุ:** อินเทอร์เน็ตช้า (< 100 bytes/sec)
+**Error Message:**
+```
+curl: (28) Operation too slow. Less than 100 bytes/sec transferred the last 5 seconds
+Failed to download https://formulae.brew.sh/api/formula.jws.json
+```
+
+**แก้ไข:**
+
+สคริปต์จะข้าม brew update อัตโนมัติและดำเนินการติดตั้งต่อ ✅
+
+คุณสามารถ update Homebrew ทีหลังเมื่ออินเทอร์เน็ตดีขึ้น:
+```bash
+brew update
+```
+
+หรือถ้าต้องการข้าม auto-update ถาวร:
+```bash
+echo 'export HOMEBREW_NO_AUTO_UPDATE=1' >> ~/.zshrc
+source ~/.zshrc
+```
+
 ### ❗ Homebrew ติดตั้งไม่ได้หรือ error
 **สาเหตุ:** ไม่มี Command Line Tools
 **แก้ไข:** ติดตั้ง xcode-select ก่อน

@@ -6,6 +6,10 @@ BACKUP_DIR="$HOME/backup-terminal"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 AUTO_INSTALL_ALL=false
 
+# Disable Homebrew auto-update to avoid network issues during installation
+# Users can manually run 'brew update' later if needed
+export HOMEBREW_NO_AUTO_UPDATE=1
+
 # ----------------------------------------------------------
 # Helper Functions
 # ----------------------------------------------------------
@@ -155,7 +159,16 @@ install_homebrew() {
   fi
 
   echo "➡ Updating Homebrew..."
-  brew update
+  echo "💡 This may take a while on slow connections..."
+  
+  # Try to update with longer timeout, but don't fail if it doesn't work
+  if ! brew update 2>/dev/null; then
+    echo "⚠️  Warning: Homebrew update failed (possibly due to slow network)"
+    echo "💡 Continuing with installation... You can update later with: brew update"
+    echo ""
+  else
+    echo "✔ Homebrew updated successfully"
+  fi
 }
 
 install_packages() {
