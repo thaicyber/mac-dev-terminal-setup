@@ -1,11 +1,13 @@
 
 ##############################################################
-# Tea Tokyo Night — One Line Edition (Unified Version)
+# Tea Tokyo Night — One Line Edition V2 (Enhanced)
 # Combines:
 #  - p10k-tea-one-line.zsh
 #  - p10k-tea-tokyonight.zsh
+#  - Enhanced with DevOps tools (nvm, python, k8s, aws, gcloud)
 # Optimized for:
 #  - Node.js Development (console.log heavy)
+#  - Backend & DevOps (Python, K8s, Cloud)
 #  - Readability
 #  - Thai-safe rendering
 #  - Minimal one-line prompt with Tokyo Night colors
@@ -26,7 +28,7 @@ typeset -g POWERLEVEL9K_MULTILINE_NEWLINE_PROMPT_PREFIX=
 typeset -g POWERLEVEL9K_MULTILINE_FIRST_PROMPT_GAP_CHAR=' '
 
 ##############################################################
-# PROMPT ELEMENTS (Minimal for Node.js development)
+# PROMPT ELEMENTS (Minimal but powerful for DevOps)
 ##############################################################
 typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
   dir        # Directory
@@ -34,9 +36,15 @@ typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
 )
 
 typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
-  status
-  command_execution_time
-  time
+  status                  # Exit code
+  command_execution_time  # Duration
+  background_jobs         # Background jobs indicator
+  nvm                     # Node.js version (from nvm)
+  virtualenv              # Python virtual environment
+  kubecontext             # Kubernetes context
+  aws                     # AWS profile
+  gcloud                  # Google Cloud project
+  time                    # Current time
 )
 
 ##############################################################
@@ -72,6 +80,33 @@ typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=178
 typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_BACKGROUND=237
 typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_PRECISION=2
 
+### Background Jobs ###
+typeset -g POWERLEVEL9K_BACKGROUND_JOBS_FOREGROUND=220
+typeset -g POWERLEVEL9K_BACKGROUND_JOBS_BACKGROUND=237
+
+### NVM (Node.js) ###
+typeset -g POWERLEVEL9K_NVM_FOREGROUND=114   # Green
+typeset -g POWERLEVEL9K_NVM_BACKGROUND=238
+typeset -g POWERLEVEL9K_NVM_SHOW_ON_UPGLOB=false
+
+### Python Virtualenv ###
+typeset -g POWERLEVEL9K_VIRTUALENV_FOREGROUND=220   # Yellow
+typeset -g POWERLEVEL9K_VIRTUALENV_BACKGROUND=238
+typeset -g POWERLEVEL9K_VIRTUALENV_SHOW_PYTHON_VERSION=false
+
+### Kubernetes ###
+typeset -g POWERLEVEL9K_KUBECONTEXT_FOREGROUND=81   # Cyan
+typeset -g POWERLEVEL9K_KUBECONTEXT_BACKGROUND=237
+typeset -g POWERLEVEL9K_KUBECONTEXT_SHOW_DEFAULT_NAMESPACE=true
+
+### AWS ###
+typeset -g POWERLEVEL9K_AWS_FOREGROUND=208   # Orange
+typeset -g POWERLEVEL9K_AWS_BACKGROUND=237
+
+### Google Cloud ###
+typeset -g POWERLEVEL9K_GCLOUD_FOREGROUND=75   # Light blue
+typeset -g POWERLEVEL9K_GCLOUD_BACKGROUND=237
+
 ### Time Display ###
 typeset -g POWERLEVEL9K_TIME_FOREGROUND=117
 typeset -g POWERLEVEL9K_TIME_BACKGROUND=238
@@ -88,6 +123,28 @@ typeset -g POWERLEVEL9K_PROMPT_CHAR_FOREGROUND=81
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 typeset -g POWERLEVEL9K_ICON_PADDING=1
+
+##############################################################
+# INSTANT PROMPT MODE
+##############################################################
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=verbose
+
+##############################################################
+# SEGMENT VISIBILITY (Show only when relevant)
+##############################################################
+# NVM: Show only when package.json exists
+typeset -g POWERLEVEL9K_NVM_SHOW_ON_UPGLOB='package.json'
+
+# Virtualenv: Show only when inside virtualenv
+typeset -g POWERLEVEL9K_VIRTUALENV_SHOW_WITH_PYENV=false
+
+# Kubernetes: Hide default context to reduce noise
+typeset -g POWERLEVEL9K_KUBECONTEXT_CLASSES=(
+  '*'         KUBECONTEXT
+)
+
+# AWS: Show only when AWS_PROFILE is set
+# Google Cloud: Show only when gcloud config is active
 
 ##############################################################
 # LOAD ENGINE
