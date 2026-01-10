@@ -54,6 +54,12 @@ typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
 # ใช้ 'compatible' mode = ไม่มี icons
 typeset -g POWERLEVEL9K_MODE='compatible'
 
+# Remove ALL separators (no icon characters between segments)
+typeset -g POWERLEVEL9K_LEFT_SEGMENT_SEPARATOR=''
+typeset -g POWERLEVEL9K_RIGHT_SEGMENT_SEPARATOR=''
+typeset -g POWERLEVEL9K_LEFT_SUBSEGMENT_SEPARATOR=' '
+typeset -g POWERLEVEL9K_RIGHT_SUBSEGMENT_SEPARATOR=' '
+
 # หรือถ้าต้องการใช้ nerdfont แต่ปิด icon เฉพาะ segment:
 # typeset -g POWERLEVEL9K_MODE='nerdfont-complete'
 # typeset -g POWERLEVEL9K_DIR_VISUAL_IDENTIFIER_EXPANSION=''
