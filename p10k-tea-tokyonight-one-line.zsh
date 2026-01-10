@@ -1,6 +1,6 @@
 
 ##############################################################
-# Tea Tokyo Night — One Line Edition V2 (Enhanced)
+# Tea Tokyo Night — One Line Edition V3 (No Icons)
 # Combines:
 #  - p10k-tea-one-line.zsh
 #  - p10k-tea-tokyonight.zsh
@@ -11,6 +11,7 @@
 #  - Readability
 #  - Thai-safe rendering
 #  - Minimal one-line prompt with Tokyo Night colors
+#  - NO ICONS (text-only for cleaner look)
 ##############################################################
 
 # Instant prompt (must be first)
@@ -48,9 +49,15 @@ typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
 )
 
 ##############################################################
-# NERD FONT ENABLED
+# ICON SETTINGS (ปิด icons ทั้งหมด)
 ##############################################################
-typeset -g POWERLEVEL9K_MODE='nerdfont-complete'
+# ใช้ 'compatible' mode = ไม่มี icons
+typeset -g POWERLEVEL9K_MODE='compatible'
+
+# หรือถ้าต้องการใช้ nerdfont แต่ปิด icon เฉพาะ segment:
+# typeset -g POWERLEVEL9K_MODE='nerdfont-complete'
+# typeset -g POWERLEVEL9K_DIR_VISUAL_IDENTIFIER_EXPANSION=''
+# typeset -g POWERLEVEL9K_VCS_VISUAL_IDENTIFIER_EXPANSION=''
 
 ##############################################################
 # TOKYO NIGHT PALETTE (Carefully unified)

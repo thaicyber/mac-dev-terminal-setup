@@ -1546,6 +1546,23 @@ iTerm2 → Preferences → Profiles → Text
 Font: JetBrainsMono Nerd Font
 ```
 
+### ❗ ไม่ต้องการ Icons ในPrompt
+**ต้องการ:** Prompt แบบ text-only ไม่มี icons
+
+**Theme ปัจจุบัน (V3):** ไม่มี icons อยู่แล้ว ✅
+
+ถ้าต้องการเปลี่ยนกลับไปใช้ icons:
+```bash
+# แก้ไขไฟล์ ~/.p10k.zsh
+# เปลี่ยนบรรทัดที่ 54 จาก:
+typeset -g POWERLEVEL9K_MODE='compatible'
+
+# เป็น:
+typeset -g POWERLEVEL9K_MODE='nerdfont-complete'
+
+# จากนั้น restart terminal
+```
+
 ### ❗ สีไม่ตรงตาม Theme Tokyo Night
 **สาเหตุ:** ยังไม่ได้ import color scheme
 **แก้ไข:**
