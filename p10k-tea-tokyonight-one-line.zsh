@@ -37,15 +37,12 @@ typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
 )
 
 typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
-  status                  # Exit code
+#   status                  # Exit code
   command_execution_time  # Duration
   background_jobs         # Background jobs indicator
-  nvm                     # Node.js version (from nvm)
-  virtualenv              # Python virtual environment
-  kubecontext             # Kubernetes context
-  aws                     # AWS profile
-  gcloud                  # Google Cloud project
-  time                    # Current time
+#   nvm                     # Node.js version (from nvm)
+#   virtualenv              # Python virtual environment
+#   aws                     # AWS profile
 )
 
 ##############################################################
