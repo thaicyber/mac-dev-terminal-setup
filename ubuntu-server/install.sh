@@ -259,9 +259,21 @@ install_nvm_and_node() {
 
   echo ""
   echo "✔ Node.js installation complete"
+  echo "📋 Installed versions:"
   nvm list
+
   echo ""
-  echo "💡 Current: node $(node --version) | npm $(npm --version)"
+  echo "💡 Current active version:"
+  node --version
+  npm --version
+
+  if [[ "$INSTALL_PACKAGE_MANAGERS" == "true" ]]; then
+    echo ""
+    echo "📦 Package managers:"
+    pnpm --version 2>/dev/null && echo "pnpm: $(pnpm --version)" || echo "pnpm: not available"
+    yarn --version 2>/dev/null && echo "yarn: $(yarn --version)" || echo "yarn: not available"
+  fi
+
   echo ""
 }
 
@@ -517,7 +529,9 @@ install_k8s_enhancement() {
   else
     echo "🐶 Installing k9s..."
     K9S_VERSION="v0.32.4"
-    wget -q "https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_Linux_$(uname -m).tar.gz" -O /tmp/k9s.tar.gz 2>/dev/null && {
+    ARCH=$(uname -m)
+    [[ "$ARCH" == "x86_64" ]] && K9S_ARCH="amd64" || K9S_ARCH="arm64"
+    wget -q "https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_Linux_${K9S_ARCH}.tar.gz" -O /tmp/k9s.tar.gz 2>/dev/null && {
       tar -xzf /tmp/k9s.tar.gz -C /tmp
       sudo mv /tmp/k9s /usr/local/bin/
       rm -f /tmp/k9s.tar.gz
@@ -622,8 +636,26 @@ install_extra_databases() {
     }
   fi
 
+  # MongoDB Database Tools (mongodump, mongorestore, mongoexport, mongoimport)
+  if command -v mongodump &>/dev/null; then
+    echo "✔ MongoDB Database Tools already installed"
+  else
+    echo "🛠  Installing MongoDB Database Tools..."
+    sudo apt-get install -y mongodb-database-tools 2>/dev/null || {
+      source /etc/os-release 2>/dev/null || true
+      UBUNTU_CODENAME="${UBUNTU_CODENAME:-jammy}"
+      if ! grep -q mongodb-org /etc/apt/sources.list.d/*.list 2>/dev/null; then
+        curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
+        echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu ${UBUNTU_CODENAME}/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+        sudo apt-get update -qq
+      fi
+      sudo apt-get install -y mongodb-database-tools || echo "⚠️  Failed to install mongodb-database-tools"
+    }
+  fi
+
   echo ""
   echo "✔ Extra Database Clients installation complete"
+  echo "💡 Note: CLI tools only. Use Docker for running servers."
   echo ""
 }
 
