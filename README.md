@@ -343,11 +343,25 @@ aliashelp
 ```
 mac-dev-terminal-setup/
 ├── .gitignore
-├── install.sh
+├── install.sh              # macOS version
+├── ubuntu-server/           # Ubuntu Server version (CLI only)
+│   ├── install.sh
+│   └── README.md
 ├── p10k-tea-tokyonight-one-line.zsh
 ├── tokyo-night.itermcolors
 └── README.md
 ```
+
+### Ubuntu Server
+
+มีเวอร์ชันสำหรับ **Ubuntu Server** (เน้น CLI สำหรับ dev) ที่ `ubuntu-server/`:
+
+```bash
+cd ubuntu-server
+bash install.sh install --all
+```
+
+ดูรายละเอียด: [ubuntu-server/README.md](ubuntu-server/README.md)
 
 ---
 
