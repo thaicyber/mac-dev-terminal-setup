@@ -6,6 +6,9 @@ BACKUP_DIR="$HOME/backup-terminal"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 AUTO_INSTALL_ALL=false
 
+TIMEZONE="Asia/Bangkok"
+PACKAGES="expect unzip zip htop xclip git software-properties-common nfs-common apache2-utils apt-transport-https ca-certificates curl gnupg-agent jq wget tree rsync lsb-release build-essential"
+
 # ----------------------------------------------------------
 # Helper Functions
 # ----------------------------------------------------------
@@ -71,23 +74,64 @@ backup_files() {
 # ----------------------------------------------------------
 
 install_base_packages() {
-  echo "📦 Updating package lists..."
-  sudo apt-get update -qq
+  echo "📦 Update and upgrade system..."
+  sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade -qq
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade -qq
 
-  echo "📦 Installing base packages..."
-  sudo apt-get install -y \
-    git \
-    curl \
-    wget \
-    ca-certificates \
-    gnupg \
-    lsb-release \
-    software-properties-common \
-    build-essential \
-    unzip \
-    >/dev/null 2>&1 || true
+  echo "🕐 Setting timezone to ${TIMEZONE}..."
+  sudo timedatectl set-timezone "${TIMEZONE}"
+  timedatectl | head -3
+
+  echo "📦 Installing necessary packages..."
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ${PACKAGES} >/dev/null 2>&1 || true
 
   echo "✔ Base packages installed"
+}
+
+install_docker() {
+  if ! command -v docker &>/dev/null; then
+    echo "🐳 Docker not found, installing..."
+    # shellcheck source=/dev/null
+    source /etc/os-release 2>/dev/null || true
+    DOCKER_DISTRO="${ID:-ubuntu}"
+    curl -fsSL "https://download.docker.com/linux/${DOCKER_DISTRO}/gpg" | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/${DOCKER_DISTRO} $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get update -qq
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce docker-ce-cli containerd.io >/dev/null 2>&1 || true
+    sudo systemctl enable docker
+    sudo systemctl start docker
+    echo "✔ Docker installed"
+  else
+    echo "✔ Docker already installed"
+  fi
+}
+
+# เรียกใช้หลังติดตั้งทุกอย่างเสร็จ (เพราะ usermod อาจทำให้ session ต้อง restart)
+setup_docker_group() {
+  if command -v docker &>/dev/null && ! groups "${USER}" | grep -q "\bdocker\b"; then
+    echo "👤 Adding user ${USER} to group docker..."
+    sudo usermod -aG docker "${USER}"
+    echo "💡 Logout and login again to use docker without sudo"
+  fi
+}
+
+setup_default_shell() {
+  local zsh_path
+  zsh_path=$(command -v zsh 2>/dev/null)
+  if [[ -z "$zsh_path" ]]; then
+    return 0
+  fi
+  if [[ "$(getent passwd "${USER}" | cut -d: -f7)" == "$zsh_path" ]]; then
+    echo "✔ Zsh already set as default shell"
+    return 0
+  fi
+  echo "🔧 Setting Zsh as default shell..."
+  if sudo chsh -s "$zsh_path" "${USER}" 2>/dev/null; then
+    echo "✔ Zsh set as default shell"
+  else
+    echo "💡 Run manually: chsh -s $zsh_path"
+  fi
 }
 
 install_zsh_and_plugins() {
@@ -242,21 +286,8 @@ install_dev_tools() {
   echo ""
   echo "📦 Installing Developer Tools..."
 
-  # Docker
-  if command -v docker &>/dev/null; then
-    echo "✔ Docker already installed"
-  else
-    echo "🐳 Installing Docker..."
-    if [[ -f /etc/os-release ]]; then
-      # shellcheck source=/dev/null
-      source /etc/os-release
-      curl -fsSL https://get.docker.com | sudo sh
-      sudo usermod -aG docker "$USER" 2>/dev/null || true
-      echo "✔ Docker installed (logout/login to use without sudo)"
-    else
-      sudo apt-get install -y docker.io || echo "⚠️  Failed to install Docker"
-    fi
-  fi
+  # Docker (official Docker repo)
+  install_docker
 
   # kubectl
   if command -v kubectl &>/dev/null; then
@@ -283,10 +314,6 @@ install_dev_tools() {
     sudo apt-get update -qq
     sudo apt-get install -y gh || echo "⚠️  Failed to install GitHub CLI"
   fi
-
-  # Utilities
-  echo "🔧 Installing utilities (jq, wget, tree, htop, rsync)..."
-  sudo apt-get install -y jq wget tree htop rsync 2>/dev/null || echo "⚠️  Some utilities failed"
 
   # Python 3
   if command -v python3 &>/dev/null; then
@@ -1004,14 +1031,17 @@ do_install() {
   echo ""
   update_zshrc "$force"
 
+  # ทำทีหลังสุด (ทั้งคู่มีผลเมื่อ login ครั้งถัดไป)
+  setup_default_shell   # ตั้ง shell ก่อน
+  setup_docker_group    # เพิ่ม group ทีหลัง
+
   echo ""
   echo "==============================================="
   echo "🎉 Installation Complete!"
   echo ""
   echo "📌 Next Steps:"
-  echo "1) Set Zsh as default: chsh -s \$(which zsh)"
-  echo "2) Logout and login again (or: exec zsh)"
-  echo "3) Test with: aliashelp"
+  echo "1) Logout and login again (or: exec zsh)"
+  echo "2) Test with: aliashelp"
   echo ""
   echo "📦 Backup: $BACKUP_DIR/$TIMESTAMP"
   echo "==============================================="
