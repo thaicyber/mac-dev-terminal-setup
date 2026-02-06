@@ -237,17 +237,13 @@ install_nvm_and_node() {
     fi
 
     if [[ "$INSTALL_PACKAGE_MANAGERS" == "true" ]]; then
-      nvm use "$version" &>/dev/null || continue
-
-      local has_pnpm has_yarn
-      has_pnpm=$(command -v pnpm &>/dev/null && echo "yes" || echo "no")
-      has_yarn=$(command -v yarn &>/dev/null && echo "yes" || echo "no")
-
-      if [[ "$has_pnpm" == "yes" && "$has_yarn" == "yes" ]]; then
+      # Use nvm exec (works in non-interactive scripts; nvm use may fail)
+      if nvm exec "$version" npm list -g pnpm --depth=0 &>/dev/null && \
+         nvm exec "$version" npm list -g yarn --depth=0 &>/dev/null; then
         echo "   ✔ pnpm and yarn already installed for Node.js ${version}"
       else
         echo "   📦 Installing pnpm and yarn for Node.js ${version}..."
-        npm install -g pnpm yarn 2>/dev/null || echo "   ⚠️  Failed to install package managers"
+        nvm exec "$version" npm install -g pnpm yarn 2>/dev/null || echo "   ⚠️  Failed to install package managers"
       fi
     fi
   done
@@ -968,6 +964,10 @@ update_zshrc() {
 
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
+
+# NVM (Node Version Manager) - ต้องมีใน .zshrc เพราะ script รันด้วย bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
 # Zsh plugins (Debian/Ubuntu package paths)
 [[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh

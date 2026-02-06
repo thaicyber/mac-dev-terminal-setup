@@ -265,21 +265,13 @@ install_nvm_and_node() {
 
     # Install package managers for each Node version
     if [[ "$INSTALL_PACKAGE_MANAGERS" == "true" ]]; then
-      nvm use "$version" &>/dev/null || {
-        echo "   ⚠️  Cannot switch to Node.js ${version}, skipping package managers"
-        continue
-      }
-
-      # Check if pnpm and yarn are already installed for this version
-      local has_pnpm has_yarn
-      has_pnpm=$(command -v pnpm &>/dev/null && echo "yes" || echo "no")
-      has_yarn=$(command -v yarn &>/dev/null && echo "yes" || echo "no")
-
-      if [[ "$has_pnpm" == "yes" && "$has_yarn" == "yes" ]]; then
+      # Use nvm exec (works in non-interactive scripts; nvm use may fail)
+      if nvm exec "$version" npm list -g pnpm --depth=0 &>/dev/null && \
+         nvm exec "$version" npm list -g yarn --depth=0 &>/dev/null; then
         echo "   ✔ pnpm and yarn already installed for Node.js ${version}"
       else
         echo "   📦 Installing pnpm and yarn for Node.js ${version}..."
-        npm install -g pnpm yarn 2>/dev/null || echo "   ⚠️  Failed to install package managers"
+        nvm exec "$version" npm install -g pnpm yarn 2>/dev/null || echo "   ⚠️  Failed to install package managers"
       fi
     fi
   done
@@ -1028,6 +1020,10 @@ update_zshrc() {
 # Thai-safe
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
+
+# NVM (Node Version Manager) - ต้องมีใน .zshrc เพราะ script รันด้วย bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
 # Load alias files
 for file in ~/.zshrc.d/*.zsh; do
