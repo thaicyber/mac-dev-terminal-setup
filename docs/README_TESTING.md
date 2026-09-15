@@ -132,7 +132,7 @@ bash backup/test-installation.sh
 - pnpm & yarn
 
 ### Phase 3: Developer Tools (6 sections)
-- Docker Desktop
+- OrbStack (Docker)
 - kubectl
 - GitHub CLI (gh)
 - Utilities (jq, wget, tree, htop, rsync)

@@ -968,6 +968,8 @@ export LC_ALL="en_US.UTF-8"
 # NVM (Node Version Manager) - ต้องมีใน .zshrc เพราะ script รันด้วย bash
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# แก้ conflict กับ .npmrc (prefix/globalconfig) - ทำให้ pnpm/yarn อยู่ใน PATH
+[ -s "$NVM_DIR/nvm.sh" ] && nvm use default --delete-prefix --silent 2>/dev/null || true
 
 # Zsh plugins (Debian/Ubuntu package paths)
 [[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh

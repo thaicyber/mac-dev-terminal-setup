@@ -175,7 +175,7 @@ done
 
 ## 🛠 Phase 3: Developer Tools
 
-### 7. Docker Desktop
+### 7. OrbStack (Docker)
 ```bash
 # ตรวจสอบ Docker
 docker --version
@@ -184,17 +184,17 @@ docker-compose --version
 # ทดสอบ Docker
 docker run hello-world
 
-# ตรวจสอบแอป Docker Desktop
-ls /Applications/Docker.app
+# ตรวจสอบแอป OrbStack
+ls /Applications/OrbStack.app
 ```
 
 **ผลลัพธ์ที่คาดหวัง:**
 - [ ] แสดงเวอร์ชัน Docker
 - [ ] docker-compose พร้อมใช้งาน
 - [ ] hello-world รันสำเร็จ
-- [ ] Docker.app ติดตั้งแล้ว
+- [ ] OrbStack.app ติดตั้งแล้ว
 
-**หมายเหตุ:** Docker Desktop อาจต้อง start ด้วยตนเองครั้งแรก
+**หมายเหตุ:** OrbStack จะเริ่มทำงานเองหลังติดตั้ง ถ้ายังไม่มีคำสั่ง docker ให้รัน `open -a OrbStack` หนึ่งครั้ง
 
 ---
 
@@ -934,8 +934,8 @@ autoload -Uz compinit && compinit
 **อาการ:** `docker: command not found` หรือ connection error
 **วิธีแก้:**
 ```bash
-# Start Docker Desktop
-open -a Docker
+# Start OrbStack
+open -a OrbStack
 
 # รอให้ Docker start (30-60 วินาที)
 # ตรวจสอบสถานะ
@@ -1015,7 +1015,7 @@ _______________________________________________
 ### พื้นที่ดิสก์ที่ใช้:
 - **Core packages:** ~2-3 GB
 - **พร้อม Node.js (5 versions):** ~4-5 GB
-- **พร้อม Docker Desktop:** ~8-10 GB
+- **พร้อม OrbStack:** ~5-6 GB
 - **การติดตั้งแบบเต็ม:** ~12-15 GB
 
 ### ข้อมูลเครือข่ายที่ดาวน์โหลด:

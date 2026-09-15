@@ -189,7 +189,7 @@ Homebrew ต้องการ sudo password ในการติดตั้�
 
 6. 🛠 Developer Tools (Optional)
    ├─ ✅ ถามผู้ใช้: "ติดตั้ง Developer Tools? [y/N]"
-   ├─ Docker Desktop (containerization)
+   ├─ OrbStack (Docker engine แบบเบา แทน Docker Desktop)
    ├─ kubectl (Kubernetes CLI)
    ├─ GitHub CLI (gh)
    ├─ Utilities: jq, wget, tree, htop, rsync
@@ -1841,7 +1841,7 @@ Created & Maintained by **Tea (Sinochar Phuvapitak)**
 - ✅ **Package Managers** (npm, pnpm, yarn) for all Node versions
 
 #### 🛠 Developer Tools:
-- ✅ **Docker Desktop** + kubectl + GitHub CLI
+- ✅ **OrbStack** (Docker) + kubectl + GitHub CLI
 - ✅ **Utilities** (jq, wget, tree, htop, rsync)
 - ✅ **NeoHtop** - Modern system monitor GUI (Rust/Tauri)
 - ✅ **Python 3.12**

@@ -203,8 +203,8 @@ fi
 
 print_section "🛠  Phase 3: Developer Tools"
 
-# 7. Docker Desktop
-echo "7️⃣  Docker Desktop"
+# 7. OrbStack (Docker)
+echo "7️⃣  OrbStack (Docker)"
 test_command "Docker command พร้อมใช้งาน" "command -v docker"
 
 # Check for both docker-compose (standalone) and docker compose (plugin)
@@ -219,7 +219,7 @@ else
   TEST_RESULTS+=("FAIL: Docker Compose พร้อมใช้งาน")
 fi
 
-test_file_exists "Docker.app ติดตั้งแล้ว" "/Applications/Docker.app"
+test_file_exists "OrbStack.app ติดตั้งแล้ว" "/Applications/OrbStack.app"
 
 # 8. kubectl
 echo ""

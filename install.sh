@@ -312,7 +312,7 @@ install_dev_tools() {
     install_dev="y"
     echo "🤖 Auto-install mode: Installing Developer Tools"
   else
-    read -r -p "ติดตั้ง Developer Tools? (Docker, kubectl, jq, etc.) [y/N]: " install_dev
+    read -r -p "ติดตั้ง Developer Tools? (OrbStack, kubectl, jq, etc.) [y/N]: " install_dev
   fi
 
   if [[ "$install_dev" != "y" && "$install_dev" != "Y" ]]; then
@@ -324,12 +324,18 @@ install_dev_tools() {
   echo ""
   echo "📦 Installing Developer Tools..."
 
-  # Docker Desktop
+  # OrbStack (Docker alternative)
   if command -v docker &>/dev/null; then
-    echo "✔ Docker already installed"
+    echo "✔ Docker already installed (via OrbStack or other)"
   else
-    echo "🐳 Installing Docker Desktop..."
-    brew install --cask docker || echo "⚠️  Failed to install Docker"
+    echo "🐳 Installing OrbStack..."
+    if brew install --cask orbstack; then
+      # OrbStack สร้าง docker CLI ให้ตอนเปิดครั้งแรก
+      open -a OrbStack 2>/dev/null || true
+      echo "💡 OrbStack ถูกเปิดครั้งแรกเพื่อติดตั้ง docker CLI (ใช้เวลาไม่กี่วินาที)"
+    else
+      echo "⚠️  Failed to install OrbStack"
+    fi
   fi
 
   # kubectl
@@ -1024,6 +1030,8 @@ export LC_ALL="en_US.UTF-8"
 # NVM (Node Version Manager) - ต้องมีใน .zshrc เพราะ script รันด้วย bash
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# แก้ conflict กับ .npmrc (prefix/globalconfig) - ทำให้ pnpm/yarn อยู่ใน PATH
+[ -s "$NVM_DIR/nvm.sh" ] && nvm use default --delete-prefix --silent 2>/dev/null || true
 
 # Load alias files
 for file in ~/.zshrc.d/*.zsh; do

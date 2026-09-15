@@ -174,7 +174,7 @@ done
 
 ## 🛠 Phase 3: Developer Tools
 
-### 7. Docker Desktop
+### 7. OrbStack (Docker)
 ```bash
 # Check Docker
 docker --version
@@ -183,17 +183,17 @@ docker-compose --version
 # Test Docker
 docker run hello-world
 
-# Check Docker Desktop app
-ls /Applications/Docker.app
+# Check OrbStack app
+ls /Applications/OrbStack.app
 ```
 
 **Expected Results:**
 - [ ] Docker version displayed
 - [ ] docker-compose available
 - [ ] hello-world runs successfully
-- [ ] Docker.app installed
+- [ ] OrbStack.app installed
 
-**Note:** Docker Desktop may need to be started manually first time
+**Note:** OrbStack starts automatically after install; if `docker` is missing, run `open -a OrbStack` once
 
 ---
 
@@ -933,8 +933,8 @@ autoload -Uz compinit && compinit
 **Symptoms:** `docker: command not found` or connection errors
 **Solution:**
 ```bash
-# Start Docker Desktop
-open -a Docker
+# Start OrbStack
+open -a OrbStack
 
 # Wait for Docker to start (30-60 seconds)
 # Check status
@@ -1014,7 +1014,7 @@ _______________________________________________
 ### Disk Space Used:
 - **Core packages:** ~2-3 GB
 - **With Node.js (5 versions):** ~4-5 GB
-- **With Docker Desktop:** ~8-10 GB
+- **With OrbStack:** ~5-6 GB
 - **Full installation:** ~12-15 GB
 
 ### Network Data Downloaded:
