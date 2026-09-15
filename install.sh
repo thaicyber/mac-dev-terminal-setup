@@ -10,6 +10,9 @@ AUTO_INSTALL_ALL=false
 # Users can manually run 'brew update' later if needed
 export HOMEBREW_NO_AUTO_UPDATE=1
 
+# corepack (bundled with Node) would otherwise pause on a hidden "download yarn? [Y/n]" prompt
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+
 # Package manager per architecture:
 #   arm64  -> Homebrew  (/opt/homebrew)
 #   x86_64 -> MacPorts  (/opt/local)  - Homebrew no longer supports Intel macOS
