@@ -1221,6 +1221,9 @@ update_zshrc() {
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
+# MacPorts (Intel Macs) - before anything that calls installed tools
+[[ -d /opt/local/bin ]] && export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+
 # NVM (Node Version Manager) - ต้องมีใน .zshrc เพราะ script รันด้วย bash
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
