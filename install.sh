@@ -10,6 +10,17 @@ AUTO_INSTALL_ALL=false
 # Users can manually run 'brew update' later if needed
 export HOMEBREW_NO_AUTO_UPDATE=1
 
+# Package manager per architecture:
+#   arm64  -> Homebrew  (/opt/homebrew)
+#   x86_64 -> MacPorts  (/opt/local)  - Homebrew no longer supports Intel macOS
+ARCH="$(uname -m)"
+if [[ "$ARCH" == "x86_64" ]]; then
+  PKG_MGR="port"
+  export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+else
+  PKG_MGR="brew"
+fi
+
 # ----------------------------------------------------------
 # Helper Functions
 # ----------------------------------------------------------
@@ -46,7 +57,7 @@ check_macos() {
     echo "❌ ระบบนี้รองรับเฉพาะ macOS เท่านั้น"
     exit 1
   fi
-  echo "✔ macOS detected"
+  echo "✔ macOS detected ($ARCH, package manager: $PKG_MGR)"
 }
 
 backup_files() {
@@ -131,6 +142,139 @@ install_xcode_cli_tools() {
   echo ""
 }
 
+# ----------------------------------------------------------
+# Package manager abstraction (brew on Apple Silicon, MacPorts on Intel)
+# ----------------------------------------------------------
+
+# Map a Homebrew formula name to the MacPorts port name.
+port_name() {
+  case "$1" in
+    python@3.12)   echo "python312" ;;
+    postgresql@16) echo "postgresql16" ;;
+    mysql-client)  echo "mysql8" ;;
+    helm)          echo "helm-3.18" ;;
+    tldr)          echo "tlrc" ;;
+    awscli)        echo "py313-awscli2" ;;
+    *)             echo "$1" ;;
+  esac
+}
+
+# Install CLI packages with the active package manager.
+pkg_install() {
+  if [[ "$PKG_MGR" == "brew" ]]; then
+    brew install "$@"
+  else
+    local ports=()
+    for f in "$@"; do ports+=("$(port_name "$f")"); done
+    sudo port -N install "${ports[@]}"
+  fi
+}
+
+# Copy the .app from a downloaded .dmg into /Applications (Intel path for casks).
+install_app_from_dmg() {
+  local url=$1 app=$2 tmp
+  tmp=$(mktemp -d)
+  curl -fsSL "$url" -o "$tmp/app.dmg" || { echo "⚠️  Download failed: $url"; rm -rf "$tmp"; return 1; }
+  local mnt
+  mnt=$(hdiutil attach -nobrowse -readonly "$tmp/app.dmg" | awk -F'\t' '/\/Volumes\//{print $NF; exit}')
+  [[ -n "$mnt" ]] || { echo "⚠️  Could not mount $url"; rm -rf "$tmp"; return 1; }
+  if [[ -d "$mnt/$app" ]]; then
+    sudo rm -rf "/Applications/$app"
+    sudo cp -R "$mnt/$app" /Applications/
+    sudo xattr -dr com.apple.quarantine "/Applications/$app" 2>/dev/null || true
+  else
+    echo "⚠️  $app not found inside dmg"
+  fi
+  hdiutil detach "$mnt" -quiet || true
+  rm -rf "$tmp"
+}
+
+# Unzip a downloaded .zip and copy the .app into /Applications (Intel path for casks).
+install_app_from_zip() {
+  local url=$1 app=$2 tmp
+  tmp=$(mktemp -d)
+  curl -fsSL "$url" -o "$tmp/app.zip" || { echo "⚠️  Download failed: $url"; rm -rf "$tmp"; return 1; }
+  unzip -qo "$tmp/app.zip" -d "$tmp" || { echo "⚠️  Unzip failed"; rm -rf "$tmp"; return 1; }
+  if [[ -d "$tmp/$app" ]]; then
+    sudo rm -rf "/Applications/$app"
+    sudo cp -R "$tmp/$app" /Applications/
+    sudo xattr -dr com.apple.quarantine "/Applications/$app" 2>/dev/null || true
+  else
+    echo "⚠️  $app not found inside zip"
+  fi
+  rm -rf "$tmp"
+}
+
+# Install GUI apps / fonts (brew cask on Apple Silicon, port or direct download on Intel).
+cask_install() {
+  local name=$1
+  if [[ "$PKG_MGR" == "brew" ]]; then
+    brew install --cask "$name"
+    return
+  fi
+  case "$name" in
+    iterm2)
+      if [[ -d /Applications/iTerm.app ]]; then echo "✔ iTerm2 already installed"; else
+        install_app_from_zip "https://iterm2.com/downloads/stable/latest" "iTerm.app"; fi ;;
+    neohtop)
+      local nh_ver
+      nh_ver=$(curl -fsSL https://api.github.com/repos/Abdenasser/neohtop/releases/latest | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p' | head -1)
+      [[ -n "$nh_ver" ]] && install_app_from_dmg "https://github.com/Abdenasser/neohtop/releases/download/v${nh_ver}/intel-NeoHtop_${nh_ver}_x64.dmg" "NeoHtop.app" ;;
+    font-jetbrains-mono-nerd-font)
+      local fonts_dir="$HOME/Library/Fonts"
+      if ls "$fonts_dir"/JetBrainsMonoNerdFont-Regular.ttf &>/dev/null; then
+        echo "✔ JetBrainsMono Nerd Font already installed"
+      else
+        local tmp; tmp=$(mktemp -d)
+        curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip -o "$tmp/f.zip" \
+          && unzip -qo "$tmp/f.zip" -d "$fonts_dir" "*.ttf" && echo "✔ JetBrainsMono Nerd Font installed"
+        rm -rf "$tmp"
+      fi ;;
+    orbstack) install_app_from_dmg "https://orbstack.dev/download/stable/latest/amd64" "OrbStack.app" ;;
+    *) echo "⚠️  No Intel install path for cask '$name'"; return 1 ;;
+  esac
+}
+
+# MacPorts installer (Intel). Picks the pkg matching the running macOS version.
+install_macports() {
+  if command -v port &>/dev/null; then
+    echo "✔ MacPorts already installed"
+  else
+    echo "📦 Installing MacPorts (Homebrew does not support Intel macOS anymore)..."
+    local major codename tag pkg tmp
+    major=$(sw_vers -productVersion | cut -d. -f1)
+    case "$major" in
+      14) codename="Sonoma" ;;
+      15) codename="Sequoia" ;;
+      26) codename="Tahoe" ;;
+      27) codename="GoldenGate" ;;
+      *)  echo "❌ Unsupported macOS version for this script: $(sw_vers -productVersion)"; return 1 ;;
+    esac
+    tag=$(curl -fsSL https://api.github.com/repos/macports/macports-base/releases/latest | sed -n 's/.*"tag_name": *"\(v[^"]*\)".*/\1/p' | head -1)
+    [[ -n "$tag" ]] || { echo "❌ Could not determine MacPorts version"; return 1; }
+    pkg="MacPorts-${tag#v}-${major}-${codename}.pkg"
+    tmp=$(mktemp -d)
+    echo "📥 Downloading $pkg..."
+    curl -fsSL "https://github.com/macports/macports-base/releases/download/${tag}/${pkg}" -o "$tmp/$pkg" || { echo "❌ Download failed"; rm -rf "$tmp"; return 1; }
+    echo "🔑 sudo is required to install the MacPorts package"
+    sudo installer -pkg "$tmp/$pkg" -target / || { echo "❌ MacPorts installation failed"; rm -rf "$tmp"; return 1; }
+    rm -rf "$tmp"
+    export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+    echo "✔ MacPorts installed"
+  fi
+  echo "➡ Updating MacPorts index (port selfupdate)..."
+  sudo port -N selfupdate || echo "⚠️  port selfupdate failed, continuing with existing index"
+}
+
+# Dispatch: brew on Apple Silicon, MacPorts on Intel.
+install_package_manager() {
+  if [[ "$PKG_MGR" == "brew" ]]; then
+    install_homebrew
+  else
+    install_macports
+  fi
+}
+
 install_homebrew() {
   if ! command -v brew &>/dev/null; then
     echo "🍺 Installing Homebrew..."
@@ -173,11 +317,11 @@ install_homebrew() {
 
 install_packages() {
   echo "📦 Installing core packages..."
-  brew install git zsh zsh-autosuggestions zsh-syntax-highlighting || true
-  brew install --cask iterm2 || true
+  pkg_install git zsh zsh-autosuggestions zsh-syntax-highlighting || true
+  cask_install iterm2 || true
 
   echo "🎨 Installing JetBrains Mono Nerd Font..."
-  brew install --cask font-jetbrains-mono-nerd-font || true
+  cask_install font-jetbrains-mono-nerd-font || true
 }
 
 install_oh_my_zsh() {
@@ -249,7 +393,7 @@ install_nvm_and_node() {
   echo "📦 Installing Node.js versions..."
 
   NODE_VERSIONS=(16 18 20 22 24)
-  DEFAULT_VERSION=22
+  DEFAULT_VERSION=24
 
   for version in "${NODE_VERSIONS[@]}"; do
     # Check if version is already installed (exact match)
@@ -329,7 +473,7 @@ install_dev_tools() {
     echo "✔ Docker already installed (via OrbStack or other)"
   else
     echo "🐳 Installing OrbStack..."
-    if brew install --cask orbstack; then
+    if cask_install orbstack; then
       # OrbStack สร้าง docker CLI ให้ตอนเปิดครั้งแรก
       open -a OrbStack 2>/dev/null || true
       echo "💡 OrbStack ถูกเปิดครั้งแรกเพื่อติดตั้ง docker CLI (ใช้เวลาไม่กี่วินาที)"
@@ -343,7 +487,7 @@ install_dev_tools() {
     echo "✔ kubectl already installed"
   else
     echo "⎈ Installing kubectl..."
-    brew install kubectl || echo "⚠️  Failed to install kubectl"
+    pkg_install kubectl || echo "⚠️  Failed to install kubectl"
   fi
 
   # GitHub CLI
@@ -351,19 +495,19 @@ install_dev_tools() {
     echo "✔ GitHub CLI already installed"
   else
     echo "🐙 Installing GitHub CLI..."
-    brew install gh || echo "⚠️  Failed to install GitHub CLI"
+    pkg_install gh || echo "⚠️  Failed to install GitHub CLI"
   fi
 
   # Utilities
   echo "🔧 Installing utilities (jq, wget, tree, htop, rsync)..."
-  brew install jq wget tree htop rsync 2>/dev/null || echo "⚠️  Some utilities failed to install"
+  pkg_install jq wget tree htop rsync 2>/dev/null || echo "⚠️  Some utilities failed to install"
 
   # neohtop - Modern system monitor GUI
   if [ -d "/Applications/NeoHtop.app" ]; then
     echo "✔ NeoHtop already installed"
   else
     echo "💪 Installing NeoHtop (modern system monitor)..."
-    brew install --cask neohtop || echo "⚠️  Failed to install NeoHtop"
+    cask_install neohtop || echo "⚠️  Failed to install NeoHtop"
   fi
 
   # Python 3
@@ -371,7 +515,11 @@ install_dev_tools() {
     echo "✔ Python 3 already installed"
   else
     echo "🐍 Installing Python 3..."
-    brew install python@3.12 || echo "⚠️  Failed to install Python 3"
+    pkg_install python@3.12 || echo "⚠️  Failed to install Python 3"
+    if [[ "$PKG_MGR" == "port" ]]; then
+      sudo port -N select --set python3 python312 2>/dev/null || true
+      sudo port -N select --set python python312 2>/dev/null || true
+    fi
   fi
 
   echo ""
@@ -405,7 +553,7 @@ install_database_tools() {
     echo "✔ PostgreSQL client already installed"
   else
     echo "🐘 Installing PostgreSQL 16 client tools..."
-    brew install postgresql@16 || echo "⚠️  Failed to install PostgreSQL client"
+    pkg_install postgresql@16 || echo "⚠️  Failed to install PostgreSQL client"
     # Add to PATH
     echo "export PATH=\"/opt/homebrew/opt/postgresql@16/bin:\$PATH\"" >> ~/.zshrc
   fi
@@ -415,7 +563,7 @@ install_database_tools() {
     echo "✔ Redis CLI already installed"
   else
     echo "🔴 Installing Redis CLI..."
-    brew install redis || echo "⚠️  Failed to install Redis CLI"
+    pkg_install redis || echo "⚠️  Failed to install Redis CLI"
   fi
 
   echo ""
@@ -450,7 +598,7 @@ install_devops_tools() {
     echo "✔ Terraform already installed"
   else
     echo "🏗 Installing Terraform..."
-    brew install terraform || echo "⚠️  Failed to install Terraform"
+    pkg_install terraform || echo "⚠️  Failed to install Terraform"
   fi
 
   # Helm
@@ -458,7 +606,7 @@ install_devops_tools() {
     echo "✔ Helm already installed"
   else
     echo "⛵ Installing Helm..."
-    brew install helm || echo "⚠️  Failed to install Helm"
+    pkg_install helm || echo "⚠️  Failed to install Helm"
   fi
 
   echo ""
@@ -492,9 +640,17 @@ install_modern_cli_tools() {
     echo "✔ fzf already installed"
   else
     echo "🔍 Installing fzf (fuzzy finder)..."
-    brew install fzf || echo "⚠️  Failed to install fzf"
+    pkg_install fzf || echo "⚠️  Failed to install fzf"
     # Install key bindings and fuzzy completion
-    "$(brew --prefix)/opt/fzf/install" --key-bindings --completion --no-update-rc 2>/dev/null || true
+    if [[ "$PKG_MGR" == "brew" ]]; then
+      "$(brew --prefix)/opt/fzf/install" --key-bindings --completion --no-update-rc 2>/dev/null || true
+    else
+      # MacPorts ships the shell files but no installer script
+      cat << 'FZFRC' > ~/.fzf.zsh
+[ -f /opt/local/share/fzf/shell/key-bindings.zsh ] && source /opt/local/share/fzf/shell/key-bindings.zsh
+[ -f /opt/local/share/fzf/shell/completion.zsh ] && source /opt/local/share/fzf/shell/completion.zsh
+FZFRC
+    fi
   fi
 
   # bat - Better cat
@@ -502,7 +658,7 @@ install_modern_cli_tools() {
     echo "✔ bat already installed"
   else
     echo "🦇 Installing bat (better cat)..."
-    brew install bat || echo "⚠️  Failed to install bat"
+    pkg_install bat || echo "⚠️  Failed to install bat"
   fi
 
   # eza - Better ls
@@ -510,7 +666,7 @@ install_modern_cli_tools() {
     echo "✔ eza already installed"
   else
     echo "📁 Installing eza (better ls)..."
-    brew install eza || echo "⚠️  Failed to install eza"
+    pkg_install eza || echo "⚠️  Failed to install eza"
   fi
 
   # ripgrep - Better grep
@@ -518,7 +674,7 @@ install_modern_cli_tools() {
     echo "✔ ripgrep already installed"
   else
     echo "🔎 Installing ripgrep (better grep)..."
-    brew install ripgrep || echo "⚠️  Failed to install ripgrep"
+    pkg_install ripgrep || echo "⚠️  Failed to install ripgrep"
   fi
 
   # fd - Better find
@@ -526,7 +682,7 @@ install_modern_cli_tools() {
     echo "✔ fd already installed"
   else
     echo "🔍 Installing fd (better find)..."
-    brew install fd || echo "⚠️  Failed to install fd"
+    pkg_install fd || echo "⚠️  Failed to install fd"
   fi
 
   # tldr - Simplified man pages
@@ -534,7 +690,7 @@ install_modern_cli_tools() {
     echo "✔ tldr already installed"
   else
     echo "📖 Installing tldr (simplified man pages)..."
-    brew install tldr || echo "⚠️  Failed to install tldr"
+    pkg_install tldr || echo "⚠️  Failed to install tldr"
   fi
 
   # zoxide - Better cd
@@ -542,7 +698,7 @@ install_modern_cli_tools() {
     echo "✔ zoxide already installed"
   else
     echo "🚀 Installing zoxide (smart cd)..."
-    brew install zoxide || echo "⚠️  Failed to install zoxide"
+    pkg_install zoxide || echo "⚠️  Failed to install zoxide"
   fi
 
   echo ""
@@ -576,7 +732,7 @@ install_k8s_enhancement() {
     echo "✔ k9s already installed"
   else
     echo "🐶 Installing k9s (K8s TUI)..."
-    brew install k9s || echo "⚠️  Failed to install k9s"
+    pkg_install k9s || echo "⚠️  Failed to install k9s"
   fi
 
   # kubectx + kubens
@@ -584,7 +740,7 @@ install_k8s_enhancement() {
     echo "✔ kubectx/kubens already installed"
   else
     echo "🔄 Installing kubectx + kubens..."
-    brew install kubectx || echo "⚠️  Failed to install kubectx"
+    pkg_install kubectx || echo "⚠️  Failed to install kubectx"
   fi
 
   echo ""
@@ -618,7 +774,7 @@ install_docker_enhancement() {
     echo "✔ lazydocker already installed"
   else
     echo "🐋 Installing lazydocker (Docker TUI)..."
-    brew install lazydocker || echo "⚠️  Failed to install lazydocker"
+    pkg_install lazydocker || echo "⚠️  Failed to install lazydocker"
   fi
 
   echo ""
@@ -652,7 +808,7 @@ install_extra_databases() {
     echo "✔ MySQL client already installed"
   else
     echo "🐬 Installing MySQL client..."
-    brew install mysql-client || echo "⚠️  Failed to install MySQL client"
+    pkg_install mysql-client || echo "⚠️  Failed to install MySQL client"
     # Add to PATH
     echo "export PATH=\"/opt/homebrew/opt/mysql-client/bin:\$PATH\"" >> ~/.zshrc
   fi
@@ -662,15 +818,31 @@ install_extra_databases() {
     echo "✔ MongoDB Shell already installed"
   else
     echo "🍃 Installing MongoDB Shell (mongosh)..."
-    # MongoDB shell requires the MongoDB tap
-    brew tap mongodb/brew 2>/dev/null || true
-    if brew install mongodb/brew/mongodb-community-shell; then
-      echo "✔ MongoDB Shell installed"
-      # Try to link if needed
-      brew link --overwrite mongodb-community-shell 2>/dev/null || true
-      echo "💡 Note: Restart terminal to use 'mongosh' command"
+    if [[ "$PKG_MGR" == "brew" ]]; then
+      # MongoDB shell requires the MongoDB tap
+      brew tap mongodb/brew 2>/dev/null || true
+      if brew install mongodb/brew/mongodb-community-shell; then
+        echo "✔ MongoDB Shell installed"
+        # Try to link if needed
+        brew link --overwrite mongodb-community-shell 2>/dev/null || true
+        echo "💡 Note: Restart terminal to use 'mongosh' command"
+      else
+        echo "⚠️  Failed to install mongosh"
+      fi
     else
-      echo "⚠️  Failed to install mongosh"
+      # Not in MacPorts: use the official darwin-x64 build
+      local ver tmp
+      ver=$(curl -fsSL https://api.github.com/repos/mongodb-js/mongosh/releases/latest | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p' | head -1)
+      tmp=$(mktemp -d)
+      if [[ -n "$ver" ]] && curl -fsSL "https://github.com/mongodb-js/mongosh/releases/download/v${ver}/mongosh-${ver}-darwin-x64.zip" -o "$tmp/m.zip" \
+         && unzip -qo "$tmp/m.zip" -d "$tmp"; then
+        sudo install -m 755 "$tmp"/mongosh-*/bin/mongosh /opt/local/bin/mongosh
+        sudo install -m 644 "$tmp"/mongosh-*/bin/mongosh_crypt_v1.dylib /opt/local/lib/ 2>/dev/null || true
+        echo "✔ MongoDB Shell installed (mongosh ${ver})"
+      else
+        echo "⚠️  Failed to install mongosh"
+      fi
+      rm -rf "$tmp"
     fi
   fi
 
@@ -679,9 +851,13 @@ install_extra_databases() {
     echo "✔ MongoDB Database Tools already installed"
   else
     echo "🛠  Installing MongoDB Database Tools..."
-    # MongoDB tools require the MongoDB tap
-    brew tap mongodb/brew 2>/dev/null || true
-    brew install mongodb/brew/mongodb-database-tools || echo "⚠️  Failed to install mongodb-database-tools"
+    if [[ "$PKG_MGR" == "brew" ]]; then
+      # MongoDB tools require the MongoDB tap
+      brew tap mongodb/brew 2>/dev/null || true
+      brew install mongodb/brew/mongodb-database-tools || echo "⚠️  Failed to install mongodb-database-tools"
+    else
+      sudo port -N install mongo-tools || echo "⚠️  Failed to install mongo-tools"
+    fi
   fi
 
   echo ""
@@ -716,7 +892,7 @@ install_api_tools() {
     echo "✔ httpie already installed"
   else
     echo "🌐 Installing httpie (better curl)..."
-    brew install httpie || echo "⚠️  Failed to install httpie"
+    pkg_install httpie || echo "⚠️  Failed to install httpie"
   fi
 
   echo ""
@@ -771,7 +947,7 @@ EOF
   # terraform completion
   if command -v terraform &>/dev/null; then
     echo "🏗 Adding terraform completion..."
-    echo 'complete -o nospace -C /opt/homebrew/bin/terraform terraform 2>/dev/null || true' >> "$COMP_FILE"
+    echo "complete -o nospace -C $(command -v terraform) terraform 2>/dev/null || true" >> "$COMP_FILE"
   fi
 
   # docker completion
@@ -836,7 +1012,8 @@ install_cloud_tools() {
 
     if [[ "$install_aws" == "y" || "$install_aws" == "Y" ]]; then
       echo "📦 Installing AWS CLI..."
-      brew install awscli || true
+      pkg_install awscli || true
+      if [[ "$PKG_MGR" == "port" ]]; then sudo port -N select --set awscli py313-awscli2 2>/dev/null || true; fi
       echo "✔ AWS CLI installed"
       echo "💡 Run 'aws configure' to setup your credentials"
     else
@@ -1033,6 +1210,14 @@ export NVM_DIR="$HOME/.nvm"
 # แก้ conflict กับ .npmrc (prefix/globalconfig) - ทำให้ pnpm/yarn อยู่ใน PATH
 [ -s "$NVM_DIR/nvm.sh" ] && nvm use default --delete-prefix --silent 2>/dev/null || true
 
+# Zsh plugins (MacPorts paths on Intel, Homebrew paths on Apple Silicon)
+for _plug in zsh-autosuggestions zsh-syntax-highlighting; do
+  for _dir in /opt/local/share /opt/homebrew/share /usr/local/share; do
+    if [[ -f "$_dir/$_plug/$_plug.zsh" ]]; then source "$_dir/$_plug/$_plug.zsh"; break; fi
+  done
+done
+unset _plug _dir
+
 # Load alias files
 for file in ~/.zshrc.d/*.zsh; do
   source "$file"
@@ -1087,7 +1272,7 @@ uninstall() {
   echo "✅ Uninstall Complete!"
   echo ""
   echo "📌 Note:"
-  echo "- Homebrew ยังคงอยู่ (ไม่ถูกลบ)"
+  echo "- Homebrew / MacPorts ยังคงอยู่ (ไม่ถูกลบ)"
   echo "- iTerm2 ยังคงอยู่ (ไม่ถูกลบ)"
   echo "- Oh My Zsh ยังคงอยู่ (ไม่ถูกลบ)"
   echo "- Fonts ยังคงอยู่ (ไม่ถูกลบ)"
@@ -1110,7 +1295,7 @@ do_install() {
 
   # Install components
   install_xcode_cli_tools
-  install_homebrew
+  install_package_manager
   install_packages
   install_oh_my_zsh
   install_nvm_and_node

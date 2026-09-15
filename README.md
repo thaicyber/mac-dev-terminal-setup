@@ -7,6 +7,26 @@
 
 ---
 
+
+## 🖥 Intel Mac (x86_64) support
+
+Homebrew no longer installs on Intel macOS, so on `x86_64` machines the script automatically uses **MacPorts** (`/opt/local`) instead of Homebrew. Everything else (Oh My Zsh, NVM, aliases, p10k, completions) is identical.
+
+Differences on Intel:
+
+| Item | Apple Silicon | Intel |
+|---|---|---|
+| Package manager | Homebrew | MacPorts (`sudo port install`) |
+| iTerm2 / NeoHtop / OrbStack | brew cask | direct download into `/Applications` |
+| JetBrainsMono Nerd Font | brew cask | downloaded into `~/Library/Fonts` |
+| mongosh | mongodb/brew tap | official darwin-x64 build into `/opt/local/bin` |
+| MongoDB tools | mongodb/brew tap | port `mongo-tools` |
+| AWS CLI | `awscli` | port `py313-awscli2` |
+| tldr | `tldr` | port `tlrc` |
+| Python 3 | `python@3.12` | port `python312` (+ `port select`) |
+
+MacPorts installs need `sudo`, so run the script from a local terminal or Screen Sharing session (not a bare SSH session without a password prompt).
+
 ## 🚀 Quick Start
 
 ### วิธีที่ 1: Interactive Mode (แนะนำ)
