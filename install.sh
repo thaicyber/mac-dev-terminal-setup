@@ -173,6 +173,15 @@ pkg_install() {
   fi
 }
 
+# MacPorts installs versioned binaries (kubectl1.37, helm3.18, ...) and exposes the
+# unversioned name only via `port select`. Pick the newest option for a group.
+port_select_latest() {
+  [[ "$PKG_MGR" == "port" ]] || return 0
+  local group=$1 opt
+  opt=$(port select --list "$group" 2>/dev/null | awk 'NR>1 && $1!="none"{print $1}' | sort -V | tail -1)
+  [[ -n "$opt" ]] && sudo port -N select --set "$group" "$opt" >/dev/null 2>&1 || true
+}
+
 # Copy the .app from a downloaded .dmg into /Applications (Intel path for casks).
 install_app_from_dmg() {
   local url=$1 app=$2 tmp
@@ -491,6 +500,7 @@ install_dev_tools() {
   else
     echo "⎈ Installing kubectl..."
     pkg_install kubectl || echo "⚠️  Failed to install kubectl"
+    port_select_latest kubectl
   fi
 
   # GitHub CLI
@@ -557,6 +567,7 @@ install_database_tools() {
   else
     echo "🐘 Installing PostgreSQL 16 client tools..."
     pkg_install postgresql@16 || echo "⚠️  Failed to install PostgreSQL client"
+    port_select_latest postgresql
     # Add to PATH
     echo "export PATH=\"/opt/homebrew/opt/postgresql@16/bin:\$PATH\"" >> ~/.zshrc
   fi
@@ -602,6 +613,7 @@ install_devops_tools() {
   else
     echo "🏗 Installing Terraform..."
     pkg_install terraform || echo "⚠️  Failed to install Terraform"
+    port_select_latest terraform
   fi
 
   # Helm
@@ -610,6 +622,7 @@ install_devops_tools() {
   else
     echo "⛵ Installing Helm..."
     pkg_install helm || echo "⚠️  Failed to install Helm"
+    port_select_latest helm
   fi
 
   echo ""
@@ -812,6 +825,7 @@ install_extra_databases() {
   else
     echo "🐬 Installing MySQL client..."
     pkg_install mysql-client || echo "⚠️  Failed to install MySQL client"
+    port_select_latest mysql
     # Add to PATH
     echo "export PATH=\"/opt/homebrew/opt/mysql-client/bin:\$PATH\"" >> ~/.zshrc
   fi
