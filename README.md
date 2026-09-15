@@ -27,6 +27,16 @@ Differences on Intel:
 
 MacPorts installs need `sudo`, so run the script from a local terminal or Screen Sharing session (not a bare SSH session without a password prompt).
 
+**Docker on pre-Skylake Intel CPUs** (e.g. Broadwell Xeon D): OrbStack refuses to start on CPUs older than 6th gen. Use Colima instead:
+
+```bash
+sudo port -N install colima docker qemu
+colima start --cpu 8 --memory 16 --disk 100 --vm-type qemu
+# compose / buildx plugins (user-level)
+mkdir -p ~/.docker/cli-plugins
+curl -fsSL -o ~/.docker/cli-plugins/docker-compose https://github.com/docker/compose/releases/latest/download/docker-compose-darwin-x86_64 && chmod +x ~/.docker/cli-plugins/docker-compose
+```
+
 ## 🚀 Quick Start
 
 ### วิธีที่ 1: Interactive Mode (แนะนำ)
